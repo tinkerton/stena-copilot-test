@@ -16,16 +16,27 @@
     html, body {
       margin: 0;
       padding: 0;
-      height: 100%;
       width: 100%;
       font-family: sans-serif;
     }
     body {
+      background-color: #fff;
+    }
+    .background {
       background: url('stenaline-website.png') no-repeat top center;
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-attachment: scroll;
-      min-height: 200vh; /* Ensure page is scrollable */
+      background-size: 100% auto;
+      width: 100%;
+      aspect-ratio: 3220 / 11844;
+    }
+    #language-selector {
+      position: fixed;
+      top: 10px;
+      right: 20px;
+      z-index: 1100;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     #copilot-chat-launcher {
       position: fixed;
@@ -54,6 +65,25 @@
   </style>
 </head>
 <body>
+  <div id="language-selector">
+    <label for="market">Market:</label>
+    <select id="market">
+      <option value="UK" selected>UK</option>
+      <option value="SE">Sweden</option>
+      <option value="NL">Netherlands</option>
+      <option value="IE">Ireland</option>
+      <option value="LV">Latvia</option>
+    </select>
+    <label for="language">Language:</label>
+    <select id="language">
+      <option value="en" selected>English</option>
+      <option value="sv">Swedish</option>
+      <option value="nl">Dutch</option>
+      <option value="lv">Latvian</option>
+    </select>
+  </div>
+
+  <div class="background"></div>
   <button id="copilot-chat-launcher">💬</button>
   <div id="copilot-chat"></div>
 
@@ -63,19 +93,24 @@
   <script>
     const chatDiv = document.getElementById("copilot-chat");
     const launcher = document.getElementById("copilot-chat-launcher");
+    const marketSelector = document.getElementById("market");
+    const languageSelector = document.getElementById("language");
 
     let chatLoaded = false;
 
     launcher.addEventListener("click", () => {
       if (!chatLoaded) {
+        const selectedMarket = marketSelector.value;
+        const selectedLanguage = languageSelector.value;
+
         Microsoft.Copilot.createChat({
-          copilotId: "YOUR-COPILOT-ID-HERE", // Replace with your real Copilot ID
+          copilotId: "cre45_stinaCopilotPoc",
           targetElement: chatDiv,
           sessionVariables: {
-            market: "UK",
-            language: "en"
+            market: selectedMarket,
+            language: selectedLanguage
           },
-          locale: "en-GB",
+          locale: selectedLanguage === 'sv' ? 'sv-SE' : selectedLanguage === 'nl' ? 'nl-NL' : selectedLanguage === 'lv' ? 'lv-LV' : 'en-GB',
           authentication: {
             mode: "unauthenticated"
           },
