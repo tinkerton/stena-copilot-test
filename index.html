@@ -53,13 +53,14 @@
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
-    #copilot-chat {
+    #copilot-frame {
       position: fixed;
       bottom: 90px;
       right: 20px;
       width: 400px;
       height: 600px;
       display: none;
+      border: none;
       z-index: 1001;
     }
   </style>
@@ -85,42 +86,27 @@
 
   <div class="background"></div>
   <button id="copilot-chat-launcher">💬</button>
-  <div id="copilot-chat"></div>
-
-  <!-- Microsoft Copilot SDK script (mocked, replace with real one when available) -->
-  <script src="https://web-chat.botframework.com/sdk/embed.js"></script>
+  <iframe id="copilot-frame"></iframe>
 
   <script>
-    const chatDiv = document.getElementById("copilot-chat");
     const launcher = document.getElementById("copilot-chat-launcher");
     const marketSelector = document.getElementById("market");
     const languageSelector = document.getElementById("language");
+    const chatFrame = document.getElementById("copilot-frame");
 
     let chatLoaded = false;
 
     launcher.addEventListener("click", () => {
-      if (!chatLoaded) {
-        const selectedMarket = marketSelector.value;
-        const selectedLanguage = languageSelector.value;
+      const market = marketSelector.value;
+      const language = languageSelector.value;
 
-        Microsoft.Copilot.createChat({
-          copilotId: "cre45_stinaCopilotPoc",
-          targetElement: chatDiv,
-          sessionVariables: {
-            market: selectedMarket,
-            language: selectedLanguage
-          },
-          locale: selectedLanguage === 'sv' ? 'sv-SE' : selectedLanguage === 'nl' ? 'nl-NL' : selectedLanguage === 'lv' ? 'lv-LV' : 'en-GB',
-          authentication: {
-            mode: "unauthenticated"
-          },
-          styleOptions: {
-            chatButtonColor: "#006bb6"
-          }
-        });
+      const url = `https://copilotstudio.microsoft.com/environments/157c0ba0-05bf-48dd-b429-5b82e6a5976b/bots/cre45_stinaCopilotPoc/webchat?__version__=2&market=${market}&language=${language}`;
+
+      if (!chatLoaded) {
+        chatFrame.src = url;
         chatLoaded = true;
       }
-      chatDiv.style.display = chatDiv.style.display === "none" ? "block" : "none";
+      chatFrame.style.display = chatFrame.style.display === "none" ? "block" : "none";
     });
   </script>
 </body>
