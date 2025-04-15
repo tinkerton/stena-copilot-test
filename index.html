@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stena Line Copilot Chat Test</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <script>
+    const password = prompt("Please enter password:");
+    if (password !== "stina2025") {
+      document.write("<h1 style='color:red;text-align:center;margin-top:20%'>Access Denied</h1>");
+      throw new Error("Unauthorized access");
+    }
+  </script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: sans-serif;
+    }
+    body {
+      background: url('stenaline-website.png') no-repeat top center;
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-attachment: scroll;
+      min-height: 200vh; /* Ensure page is scrollable */
+    }
+    #copilot-chat-launcher {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      background-color: #006bb6;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      font-size: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    #copilot-chat {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 400px;
+      height: 600px;
+      display: none;
+      z-index: 1001;
+    }
+  </style>
+</head>
+<body>
+  <button id="copilot-chat-launcher">💬</button>
+  <div id="copilot-chat"></div>
+
+  <!-- Microsoft Copilot SDK script (mocked, replace with real one when available) -->
+  <script src="https://web-chat.botframework.com/sdk/embed.js"></script>
+
+  <script>
+    const chatDiv = document.getElementById("copilot-chat");
+    const launcher = document.getElementById("copilot-chat-launcher");
+
+    let chatLoaded = false;
+
+    launcher.addEventListener("click", () => {
+      if (!chatLoaded) {
+        Microsoft.Copilot.createChat({
+          copilotId: "YOUR-COPILOT-ID-HERE", // Replace with your real Copilot ID
+          targetElement: chatDiv,
+          sessionVariables: {
+            market: "UK",
+            language: "en"
+          },
+          locale: "en-GB",
+          authentication: {
+            mode: "unauthenticated"
+          },
+          styleOptions: {
+            chatButtonColor: "#006bb6"
+          }
+        });
+        chatLoaded = true;
+      }
+      chatDiv.style.display = chatDiv.style.display === "none" ? "block" : "none";
+    });
+  </script>
+</body>
+</html>
