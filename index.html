@@ -18,6 +18,7 @@
       padding: 0;
       width: 100%;
       font-family: sans-serif;
+      height: 100%;
     }
     body {
       background-color: #fff;
@@ -53,15 +54,17 @@
       cursor: pointer;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
-    #copilot-frame {
+    #webchat-container {
       position: fixed;
       bottom: 90px;
       right: 20px;
       width: 400px;
       height: 600px;
       display: none;
-      border: none;
       z-index: 1001;
+      border-radius: 8px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      overflow: hidden;
     }
   </style>
 </head>
@@ -86,27 +89,60 @@
 
   <div class="background"></div>
   <button id="copilot-chat-launcher">💬</button>
-  <iframe id="copilot-frame"></iframe>
+  <div id="webchat-container" role="main"></div>
 
+  <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
   <script>
     const launcher = document.getElementById("copilot-chat-launcher");
     const marketSelector = document.getElementById("market");
     const languageSelector = document.getElementById("language");
-    const chatFrame = document.getElementById("copilot-frame");
+    const chatContainer = document.getElementById("webchat-container");
 
     let chatLoaded = false;
 
-    launcher.addEventListener("click", () => {
+    launcher.addEventListener("click", async () => {
       const market = marketSelector.value;
       const language = languageSelector.value;
+      document.documentElement.lang = language;
 
-      const url = `https://copilotstudio.microsoft.com/environments/157c0ba0-05bf-48dd-b429-5b82e6a5976b/bots/cre45_stinaCopilotPoc/webchat?__version__=2&market=${market}&language=${language}`;
+      chatContainer.style.display = chatContainer.style.display === "none" ? "block" : "none";
 
       if (!chatLoaded) {
-        chatFrame.src = url;
+        const styleOptions = {
+          hideUploadButton: true,
+          accent: "#006bb6",
+          bubbleBackground: "#E6F2FB",
+          bubbleTextColor: "#003A63"
+        };
+
+        const tokenEndpointURL = new URL('https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview');
+        const apiVersion = tokenEndpointURL.searchParams.get('api-version');
+
+        const [directLineURL, token] = await Promise.all([
+          fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+            .then(response => response.json())
+            .then(({ channelUrlsById: { directline } }) => directline),
+          fetch(tokenEndpointURL)
+            .then(response => response.json())
+            .then(({ token }) => token)
+        ]);
+
+        const directLine = window.WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
+
+        WebChat.renderWebChat(
+          {
+            directLine,
+            locale: language,
+            styleOptions,
+            userID: "user_stina_demo",
+            sendTypingIndicator: true,
+            store: WebChat.createStore({}, ({ dispatch }) => next => action => next(action))
+          },
+          chatContainer
+        );
+
         chatLoaded = true;
       }
-      chatFrame.style.display = chatFrame.style.display === "none" ? "block" : "none";
     });
   </script>
 </body>
