@@ -1,15 +1,10 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contoso Sample Web Chat</title>
-    <!--
-      This styling is for the Web Chat demonstration purposes. 
-      It is recommended that style is moved to a separate file for organization in larger projects.
-
-      Please visit https://github.com/microsoft/BotFramework-WebChat for details about Web Chat.
-    -->
     <style>
       html,
       body {
@@ -24,24 +19,8 @@
         aspect-ratio: 3220 / 11844;
       }
 
-      h1 {
-        color: whitesmoke;
-        font-family: Segoe UI;
-        font-size: 16px;
-        line-height: 20px;
-        margin: 0;
-        padding: 0 20px;
-      }
-
-      #banner {
-        align-items: center;
-        background-color: black;
-        display: flex;
-        height: 50px;
-      }
-
-      /* Chat window panel */
-      #webchat {
+      /* Chat wrapper including header and chat pane */
+      #chat-wrapper {
         display: none;
         position: fixed;
         bottom: 50px;
@@ -54,6 +33,39 @@
         z-index: 500;
         background: #fff;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      /* Header inside chat wrapper */
+      #chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #004a93;
+        color: white;
+        height: 50px;
+        padding: 0 10px;
+      }
+
+      #chat-header h1 {
+        font-family: Segoe UI;
+        font-size: 16px;
+        margin: 0;
+      }
+
+      #settings {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      #settings select {
+        height: 28px;
+        font-size: 12px;
+      }
+
+      /* Chat pane itself rendered by Web Chat */
+      #webchat {
+        height: calc(100% - 50px);
       }
 
       /* Chat open/close button */
@@ -74,7 +86,6 @@
         padding: 0;
       }
 
-      /* Button icon image */
       #chat-button img {
         width: 24px;
         height: 24px;
@@ -82,44 +93,51 @@
     </style>
   </head>
   <body class="background">
-    <div id="banner">
-      <h1>Contoso agent name</h1>
+    <!-- Chat wrapper with header and chat container -->
+    <div id="chat-wrapper">
+      <div id="chat-header">
+        <h1>Stina 2.0</h1>
+        <div id="settings">
+          <select id="language-select" title="Select language">
+            <option value="en">English</option>
+            <option value="sv">Swedish</option>
+            <option value="nl">Dutch</option>
+            <option value="pl">Polish</option>
+          </select>
+          <select id="market-select" title="Select market">
+            <option value="uk">UK</option>
+            <option value="ie">IE</option>
+            <option value="se">SE</option>
+            <option value="nl">NL</option>
+            <option value="pl">PL</option>
+          </select>
+        </div>
+      </div>
+      <div id="webchat" role="main"></div>
     </div>
-    <div id="webchat" role="main"></div>
 
     <button id="chat-button" aria-label="Open chat">
       <img src="chaticon.png" alt="Chat icon" />
     </button>
 
-    <!-- In production, pin Web Chat version instead of using 'latest' -->
     <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
 
     <script>
       (async function () {
-        const styleOptions = {
-          hideUploadButton: true,
-          accent: '#FF0000'
-        };
-
+        const styleOptions = { hideUploadButton: true, accent: '#FF0000' };
         const tokenEndpointURL = new URL(
           'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
         );
 
-        const locale = document.documentElement.lang || 'en';
+        let locale = document.documentElement.lang || 'en';
         const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
         const [directLineURL, token] = await Promise.all([
           fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
-            .then(response => {
-              if (!response.ok) throw new Error('Failed to retrieve regional channel settings.');
-              return response.json();
-            })
+            .then(res => res.ok ? res.json() : Promise.reject())
             .then(({ channelUrlsById: { directline } }) => directline),
           fetch(tokenEndpointURL)
-            .then(response => {
-              if (!response.ok) throw new Error('Failed to retrieve Direct Line token.');
-              return response.json();
-            })
+            .then(res => res.ok ? res.json() : Promise.reject())
             .then(({ token }) => token)
         ]);
 
@@ -131,39 +149,55 @@
         const subscription = directLine.connectionStatus$.subscribe({
           next(value) {
             if (value === 2) {
-              directLine
-                .postActivity({
-                  localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                  locale,
-                  name: 'startConversation',
-                  type: 'event'
-                })
-                .subscribe();
-
+              directLine.postActivity({
+                type: 'event',
+                name: 'startConversation',
+                locale,
+                localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+              }).subscribe();
               subscription.unsubscribe();
             }
           }
         });
 
-        WebChat.renderWebChat({ directLine, locale, styleOptions }, document.getElementById('webchat'));
+        const renderChat = lang => {
+          WebChat.renderWebChat({ directLine, locale: lang, styleOptions }, document.getElementById('webchat'));
+        };
 
-        // Toggle chat visibility and button display
+        // Initial render
+        renderChat(locale);
+
+        // UI elements
         const chatButton = document.getElementById('chat-button');
-        const webchatEl = document.getElementById('webchat');
+        const chatWrapper = document.getElementById('chat-wrapper');
+        const languageSelect = document.getElementById('language-select');
+        const marketSelect = document.getElementById('market-select');
 
+        // Toggle chat visibility
         chatButton.addEventListener('click', () => {
-          webchatEl.style.display = 'block';
+          chatWrapper.style.display = 'block';
           chatButton.style.display = 'none';
         });
 
-        // Optional: close chat when user clicks outside the chat window
+        // Change locale dynamically
+        languageSelect.addEventListener('change', () => {
+          locale = languageSelect.value;
+          renderChat(locale);
+        });
+
+        // Send market setting
+        marketSelect.addEventListener('change', () => {
+          directLine.postActivity({ type: 'event', name: 'userSettings', value: { Global: { market: marketSelect.value } } }).subscribe();
+        });
+
+        // Close chat when clicking outside
         document.addEventListener('click', event => {
           if (
-            webchatEl.style.display === 'block' &&
-            !webchatEl.contains(event.target) &&
+            chatWrapper.style.display === 'block' &&
+            !chatWrapper.contains(event.target) &&
             !chatButton.contains(event.target)
           ) {
-            webchatEl.style.display = 'none';
+            chatWrapper.style.display = 'none';
             chatButton.style.display = 'flex';
           }
         });
