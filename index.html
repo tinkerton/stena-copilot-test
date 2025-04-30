@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,7 +8,12 @@
     <style>
       /* Page background */
       html, body { height: 100%; margin: 0; }
-      .background { background: url('stenaline-website.png') no-repeat top center; background-size: 100% auto; width: 100%; aspect-ratio: 3220 / 11844; }
+      .background {
+        background: url('stenaline-website.png') no-repeat top center;
+        background-size: 100% auto;
+        width: 100%;
+        aspect-ratio: 3220 / 11844;
+      }
 
       /* Global settings dropdowns */
       #global-settings {
@@ -68,6 +74,7 @@
       #chat-button img { width: 24px; height: 24px; }
     </style>
   </head>
+
   <body class="background">
     <div id="global-settings">
       <select id="language-select" title="Select language">
@@ -90,101 +97,99 @@
       <div id="webchat" role="main"></div>
     </div>
 
-    <button id="chat-button" aria-label="Open chat"><img src="chaticon.png" alt="Chat icon"/></button>
+    <button id="chat-button" aria-label="Open chat">
+      <img src="chaticon.png" alt="Chat icon"/>
+    </button>
 
-    <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+    <script crossorigin="anonymous"
+      src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js">
+    </script>
     <script>
       (async function() {
-        // Base style options
-        const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
-        const styleSet = WebChat.createStyleSet(styleOptions);
-
-        // Bot bubble styling: auto width, max 100%, stacked vertically
-        styleSet.bubbleFromBot = {
-          background: 'rgb(238, 238, 238)',
-          margin: '7px 0 0 0',
-          width: 'auto',
-          maxWidth: '100%',
-          padding: '10px 14px',
-          borderRadius: '10px 10px 10px 0px',
-          transform: 'scale(1)',
-          animationFillMode: 'forwards',
-          transformOrigin: '0px 0px',
-          transition: 'border-radius 300ms',
-          whiteSpace: 'normal'
-        };
-
-        // Quick replies container: vertical stack
-        styleSet.suggestedActionsContainer = {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          maxWidth: '380px',
-          width: '100%'
-        };
-
-        // Quick reply button styling: no right margin to avoid overflow
-        styleSet.suggestedAction = {
-          width: '100%',
-          backgroundColor: 'transparent',
-          border: 'thin dashed rgb(212, 212, 212)',
-          color: 'black',
-          minWidth: '100px',
-          margin: '10px 0 0 0',
-          padding: '10px 14px',
-          borderRadius: '20px',
-          textAlign: 'center',
-          fontSize: '1em',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        };
-
-        // Fetch token & DirectLine URL
+        // 1. Fetch DirectLine token & URL once
         const tokenEndpointURL = new URL(
-          'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
+          'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
+          'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
         );
         const apiVersion = tokenEndpointURL.searchParams.get('api-version');
         const [directLineURL, token] = await Promise.all([
-          fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
-            .then(r => r.json()).then(j => j.channelUrlsById.directline),
-          fetch(tokenEndpointURL).then(r => r.json()).then(j => j.token)
+          fetch(
+            new URL(
+              `/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`,
+              tokenEndpointURL
+            )
+          ).then(res => res.json()).then(json => json.channelUrlsById.directline),
+          fetch(tokenEndpointURL).then(res => res.json()).then(json => json.token)
         ]);
+        const directLine = WebChat.createDirectLine({
+          domain: new URL('v3/directline', directLineURL),
+          token
+        });
 
-        // Initialize DirectLine
-        const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
-        directLine.connectionStatus$.subscribe({ next: v => {
-          if (v === 2) {
-            directLine.postActivity({ type: 'event', name: 'startConversation', locale: document.documentElement.lang || 'en', localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }).subscribe();
-          }
-        }});
+        // 2. Prepare unified Web Chat options
+        const styleOptions = {
+          hideUploadButton: true,
+          accent: '#FF0000',
+          suggestedActionLayout: 'stacked'
+        };
+        const styleSet = WebChat.createStyleSet(styleOptions);
 
-        // Render Web Chat
-        WebChat.renderWebChat({ directLine, locale: document.documentElement.lang || 'en', styleOptions, styleSet }, document.getElementById('webchat'));
+        // 3. Function to (re)render Web Chat with a given locale
+        function renderChat(locale) {
+          document.documentElement.lang = locale;
 
-        // UI handlers
+          WebChat.renderWebChat(
+            { directLine, locale, styleOptions, styleSet },
+            document.getElementById('webchat')
+          );
+
+          // Kick off a fresh conversation so the bot knows the language
+          directLine.postActivity({
+            type: 'event',
+            name: 'startConversation',
+            locale,
+            localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          }).subscribe();
+        }
+
+        // 4. Wire up UI controls
         const chatButton = document.getElementById('chat-button');
         const chatWrapper = document.getElementById('chat-wrapper');
         const languageSelect = document.getElementById('language-select');
         const marketSelect = document.getElementById('market-select');
 
         // Toggle chat visibility
-        chatButton.addEventListener('click', () => { chatWrapper.style.display = 'block'; chatButton.style.display = 'none'; });
+        chatButton.addEventListener('click', () => {
+          chatWrapper.style.display = 'block';
+          chatButton.style.display = 'none';
+        });
         document.addEventListener('click', e => {
-          if (chatWrapper.style.display === 'block' && !chatWrapper.contains(e.target) && !chatButton.contains(e.target)) {
-            chatWrapper.style.display = 'none'; chatButton.style.display = 'flex';
+          if (
+            chatWrapper.style.display === 'block' &&
+            !chatWrapper.contains(e.target) &&
+            !chatButton.contains(e.target)
+          ) {
+            chatWrapper.style.display = 'none';
+            chatButton.style.display = 'flex';
           }
         });
 
-        // Language change event
+        // When the language changes, re-render Web Chat
         languageSelect.addEventListener('change', () => {
-          directLine.postActivity({ type: 'event', name: 'userSettings', value: { System: { 'User.Language': languageSelect.value } } }).subscribe();
+          renderChat(languageSelect.value);
         });
-        // Market change event
+
+        // When the market changes, send a userSettings event
         marketSelect.addEventListener('change', () => {
-          directLine.postActivity({ type: 'event', name: 'userSettings', value: { Global: { market: marketSelect.value } } }).subscribe();
+          directLine.postActivity({
+            type: 'event',
+            name: 'userSettings',
+            value: { Global: { market: marketSelect.value } }
+          }).subscribe();
         });
+
+        // 5. Initial render (defaults to whatever <html lang> was set to)
+        renderChat(languageSelect.value || 'en');
       })();
     </script>
   </body>
