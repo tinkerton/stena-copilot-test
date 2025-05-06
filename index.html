@@ -228,14 +228,27 @@
             { directLine, locale, styleOptions, styleSet },
             document.getElementById('webchat')
           );
+        
+          // Start the conversation
           directLine.postActivity({
             type: 'event',
             name: 'startConversation',
             locale,
             localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
           }).subscribe();
+        
+          // Set initial marketCode from the select field
+          directLine.postActivity({
+            type: 'event',
+            name: 'userSettings',
+            value: {
+              Global: {
+                marketCode: marketSelect.value
+              }
+            }
+          }).subscribe();
         }
-
+        
         // 5. UI wiring
         const languageSelect = document.getElementById('language-select');
         const marketSelect   = document.getElementById('market-select');
@@ -265,7 +278,7 @@
           directLine.postActivity({
             type: 'event',
             name: 'userSettings',
-            value: { Global: { market: marketSelect.value } }
+            value: { Global: { marketCode: marketSelect.value } }
           }).subscribe();
         });
 
