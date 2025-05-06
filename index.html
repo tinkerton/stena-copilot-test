@@ -238,15 +238,19 @@
           }).subscribe();
         
           // Set initial marketCode from the select field
-          directLine.postActivity({
-            type: 'event',
-            name: 'userSettings',
-            value: {
-              Global: {
-                marketCode: marketSelect.value
+         setTimeout(() => {
+            directLine.postActivity({
+              type: 'event',
+              name: 'userSettings',
+              value: {
+                Global: {
+                  marketCode: marketSelect.value.toLowerCase()
+                }
               }
-            }
-          }).subscribe();
+            }).subscribe();
+          }, 500);
+
+          
         }
         
         // 5. UI wiring
