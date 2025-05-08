@@ -1,68 +1,107 @@
 // script.js
 
-document.addEventListener('DOMContentLoaded', async () => {
-  // === 0. Hard-coded settings ===
-  const marketCode = 'uk';     // Your market code
-  const userLocale = 'en-GB';  // Your locale
+document.addEventListener('DOMContentLoaded', () => {
+  // === 0. Hårdkodade värden ===
+  const marketCode = 'se';
+  const userLocale = 'en-GB';
 
-  // === 1. Fetch DirectLine URL & token ===
-  const tokenEndpoint = new URL(
-    'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
-    'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
-  );
-  const apiVersion = tokenEndpoint.searchParams.get('api-version');
+  // === 1. DOM-element ===
+  const chatButton   = document.getElementById('chat-button');
+  const chatWrapper  = document.getElementById('chat-wrapper');
+  const webchatDiv   = document.getElementById('webchat');
 
-  let directLineURL, token;
-  try {
-    [ directLineURL, token ] = await Promise.all([
-      fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpoint))
-        .then(res => res.ok ? res.json() : Promise.reject(res.status))
-        .then(json => json.channelUrlsById.directline),
-      fetch(tokenEndpoint)
-        .then(res => res.ok ? res.json() : Promise.reject(res.status))
-        .then(json => json.token)
-    ]);
-  } catch (err) {
-    console.error('Failed to fetch DirectLine info:', err);
-    document.getElementById('webchat').innerHTML =
-      '<p style="color:red; padding:1em;">Chatt kunde inte laddas. Försök igen senare.</p>';
+  if (!chatButton || !chatWrapper || !webchatDiv) {
+    console.error('Saknar #chat-button, #chat-wrapper eller #webchat i DOM');
     return;
   }
 
-  // === 2. Create DirectLine instance ===
-  const directLine = WebChat.createDirectLine({
-    domain: `${directLineURL}/v3/directline`,
-    token
+  let chatInitialized = false;
+  let directLine;  // blir satt när vi initierar
+
+  // === 2. Öppna chatten på knapptryck ===
+  chatButton.addEventListener('click', async () => {
+    chatWrapper.style.display = 'block';
+    chatButton.style.display  = 'none';
+
+    if (!chatInitialized) {
+      await initChat();
+      chatInitialized = true;
+    }
   });
 
-  // === 3. Render Web Chat once ===
-  WebChat.renderWebChat(
-    {
-      directLine,
-      locale: userLocale,
-      styleOptions: { hideUploadButton: true },
-    },
-    document.getElementById('webchat')
-  );
+  // Stäng chatten om man klickar utanför
+  document.addEventListener('click', e => {
+    if (
+      chatWrapper.style.display === 'block' &&
+      !chatWrapper.contains(e.target) &&
+      !chatButton.contains(e.target)
+    ) {
+      chatWrapper.style.display = 'none';
+      chatButton.style.display  = 'flex';
+    }
+  });
 
-  // === 4. Send initial context + join after connection ===
-  directLine.connectionStatus$
-    .subscribe(status => {
-      // 2 = Online
-      if (status === 2) {
-        // a) send context
-        directLine.postActivity({
-          type: 'event',
-          name: 'pvaSetContext',
-          value: { marketCode, userLocale }
-        }).subscribe();
+  // === 3. Funktion för att initiera Web Chat ===
+  async function initChat() {
+    // 3.1 Hämta URL & token
+    const tokenEndpoint = new URL(
+      'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
+      'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
+    );
+    const apiVersion = tokenEndpoint.searchParams.get('api-version');
+    let directLineURL, token;
 
-        // b) trigger welcome
-        directLine.postActivity({
-          type: 'event',
-          name: 'webchat/join',
-          value: {}
-        }).subscribe();
-      }
+    try {
+      [ directLineURL, token ] = await Promise.all([
+        fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpoint))
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(j => j.channelUrlsById.directline),
+        fetch(tokenEndpoint)
+          .then(r => r.ok ? r.json() : Promise.reject(r.status))
+          .then(j => j.token)
+      ]);
+    } catch (err) {
+      console.error('Kunde inte hämta DirectLine-config:', err);
+      webchatDiv.innerHTML =
+        '<p style="color:red; padding:1em;">Chatt kunde inte laddas. Försök igen senare.</p>';
+      return;
+    }
+
+    // 3.2 Skapa DirectLine
+    directLine = WebChat.createDirectLine({
+      domain: `${directLineURL}/v3/directline`,
+      token
     });
+
+    // 3.3 Rendera Web Chat
+    WebChat.renderWebChat(
+      {
+        directLine,
+        locale: userLocale,
+        styleOptions: { hideUploadButton: true },
+      },
+      webchatDiv
+    );
+
+    // 3.4 Vänta på att DirectLine går online, skicka context + join
+    directLine.connectionStatus$
+      .subscribe(status => {
+        // 2 = Online
+        if (status === 2) {
+          // skicka marketCode + locale
+          directLine.postActivity({
+            type: 'event',
+            name: 'pvaSetContext',
+            value: { marketCode, userLocale }
+          }).subscribe();
+
+          // trigga välkomstmeddelandet
+          directLine.postActivity({
+            type: 'event',
+            name: 'webchat/join',
+            value: {}
+          }).subscribe();
+        }
+      });
+  }
 });
