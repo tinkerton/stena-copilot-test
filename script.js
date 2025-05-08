@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
           payload: {
             name: 'pvaSetContext',
             value: {
-              'marketCode': 'se', //marketCode
+              'marketCode': 'ie2', //marketCode
               'testCode':   currentTestCode
             }
           }
