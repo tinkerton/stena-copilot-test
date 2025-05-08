@@ -134,40 +134,46 @@
     justifyContent: 'center' // Center content horizontally
   };
 
-
   // === 4. Helper Functions ===
-  // Renders the Web Chat with the specified locale and sends initial marketCode
-  function renderChat(locale) {
-    document.documentElement.lang = locale; // Set page language attribute
+// Renders the Web Chat with the specified locale and sends initial marketCode via store
+function renderChat(locale) {
+  document.documentElement.lang = locale; // Set page language attribute
 
-    const currentMarketCode = marketSelect.value.toLowerCase(); // Get current market selection
+  const currentMarketCode = marketSelect.value.toLowerCase(); // Get current market selection
 
-    // Render the Web Chat control into the div with id="webchat"
-    WebChat.renderWebChat(
-      {
-        directLine,       // DirectLine instance for communication
-        locale,           // Language code
-        styleOptions,     // Basic styling options
-        styleSet          // The generated styleSet with deep overrides
-        // You can also add userID, username here if needed
-      },
-      document.getElementById('webchat')
-    );
+  // --- 4.1. Skapa store med middleware för pvaSetContext ---
+  const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
+    if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+      dispatch({
+        type: 'WEB_CHAT/SEND_EVENT', // Standardåtgärd för att skicka en händelse via Web Chat
+        payload: {
+          name: 'pvaSetContext',     // Händelsenamnet Copilot Studio förväntar sig
+          value: {
+            // Nyckeln här ("marketCode") måste matcha namnet på din globala variabel
+            // i Copilot Studio (utan "Global."-prefixet).
+            "marketCode": currentMarketCode
+            // Du kan lägga till fler kontextvariabler här om det behövs, t.ex.:
+            // "userLocale": locale
+          }
+        }
+      });
+      console.log('pvaSetContext event dispatched via store middleware for market:', currentMarketCode);
+    }
+    return next(action);
+  });
 
-    // Send the 'startConversation' event to the bot including initial settings
-    directLine.postActivity({
-      type: 'event',              // Activity type is 'event'
-      name: 'pvaSetContext',  // Event name (standard for PVA/Copilot on start)
-      locale: locale,                     // Current locale
-      localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Current timezone
-      value: {                    // Optional data object to send with the event
-          marketCode: currentMarketCode // The current market value at start
-      }
-    }).subscribe({
-      next: (id) => console.log("pvaSetContext activity skickad med ID: ", id),
-      error: (err) => console.error('Misslyckades med att skicka pvaSetContext activity:', err)
-    });
-  }
+  // --- 4.2. Rendera Web Chat-kontrollen med store ---
+  WebChat.renderWebChat(
+    {
+      directLine,      // Din befintliga DirectLine-instans
+      store,           // Det nyskapade store-objektet
+      locale,          // Språkkod för Web Chat UI
+      styleOptions,    // Dina befintliga stilalternativ
+      styleSet         // Ditt befintliga styleSet
+      // userID, username kan också läggas till här om det behövs
+    },
+    document.getElementById('webchat')
+  );
 
 
   // === 5. Event Handlers (UI Interaction) ===
