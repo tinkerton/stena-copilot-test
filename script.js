@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // När DirectLine är online: skicka kontext och trigga start
     directLine.connectionStatus$.subscribe(status => {
+      console.log('pvaSetContext and marketCode is' + currentMarketCode)
       if (status === 2) {
         directLine.postActivity({
           type: 'event',
