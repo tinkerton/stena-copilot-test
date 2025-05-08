@@ -1,7 +1,7 @@
 // script.js
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Get DOM elements
+  // 1) DOM elements
   const chatButton  = document.getElementById('chat-button');
   const chatWrapper = document.getElementById('chat-wrapper');
   const webchatDiv  = document.getElementById('webchat');
@@ -11,15 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  // 2. Hard-coded context values
+  // 2) Hard-coded context values
   const currentLanguage   = 'sv-SE';
   const currentMarketCode = 'se';
-  const currentTestCode   = 'se';  // or whatever testCode you need
+  const currentTestCode   = 'se'; // your testCode value
 
   let chatInitialized = false;
   let directLine;
 
-  // 3. Show/start chat on button click
+  // 3) On icon click, show chat and initialize once
   chatButton.addEventListener('click', async () => {
     chatWrapper.style.display = 'block';
     chatButton.style.display = 'none';
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 4. Hide chat when clicking outside
+  // 4) Hide chat when clicking outside
   document.addEventListener('click', e => {
     if (
       chatWrapper.style.display === 'block' &&
@@ -42,16 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 5. Initialize the Web Chat
+  // 5) Initialize Web Chat & send globals via store
   async function initChat() {
-    // 5a. Build token endpoint
+    // 5a) Build token URL
     const tokenEndpointURL = new URL(
       'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
       'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
     );
     const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
-    // 5b. Fetch DirectLine endpoint & token
+    // 5b) Fetch DirectLine URL & token
     let directLineURL, token;
     try {
       [ directLineURL, token ] = await Promise.all([
@@ -68,13 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 5c. Create DirectLine
+    // 5c) Create DirectLine
     directLine = window.WebChat.createDirectLine({
       domain: `${directLineURL}/v3/directline`,
       token
     });
 
-    // 5d. Create a store that sends pvaSetContext + webchat/join on connect
+    // 5d) Create store that sends pvaSetContext on connect
     const store = window.WebChat.createStore(
       {},
       ({ dispatch }) => next => action => {
@@ -85,16 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
               name: 'pvaSetContext',
               value: {
                 'marketCode': currentMarketCode,
-                'testCode':   currentTestCode,
-                'userLocale': currentLanguage
+                'testCode':   currentTestCode
               }
-            }
-          });
-          dispatch({
-            type: 'WEB_CHAT/SEND_EVENT',
-            payload: {
-              name: 'webchat/join',
-              value: {}
             }
           });
         }
@@ -102,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     );
 
-    // 5e. Render Web Chat once
+    // 5e) Render Web Chat once
     window.WebChat.renderWebChat(
       {
         directLine,
