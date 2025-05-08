@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
           type: 'event',
           name: 'pvaSetContext',
           value: {
-            'marketCode': currentMarketCode
+            'testCode': currentMarketCode
           }
         }).subscribe();
 
