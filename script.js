@@ -12,9 +12,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 2) Your hard-coded context values
-  const currentMarketCode = 'se';
-  const currentTestCode   = 'se';
-  const currentLanguage   = 'sv-SE';
+  const currentMarketCode = 'ie';
+  const currentTestCode   = 'ie';
+  const currentLanguage   = 'en-IE';
 
   let chatInitialized = false;
   let directLine;
@@ -81,12 +81,13 @@ document.addEventListener('DOMContentLoaded', () => {
     ({ dispatch }) => next => action => {
       if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
         // 1) Initialize globals (This is CORRECT and RECOMMENDED)
+        console.log("1 Initialize globals - DIRECT_LINE/CONNECT_FULFILLED");
         dispatch({
           type: 'WEB_CHAT/SEND_EVENT',
           payload: {
             name: 'pvaSetContext',
             value: {
-              'marketCode': currentMarketCode,
+              'marketCode': 'se', //marketCode
               'testCode':   currentTestCode
             }
           }
