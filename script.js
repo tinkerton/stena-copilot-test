@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // === 0. Hårdkodade värden ===
   const marketCode = 'se';
-  const userLocale = 'se-SV';
+  const userLocale = 'sv-SE';
 
   // === 1. DOM-element ===
   const chatButton  = document.getElementById('chat-button');
