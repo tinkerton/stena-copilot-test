@@ -129,7 +129,7 @@
   });
 
   languageSelect.addEventListener('change', () => {
-    renderChat(languageSelect.value);
+    renderChat(languageSelect.value || 'en-GB');
   });
 
   marketSelect.addEventListener('change', () => {
@@ -145,7 +145,7 @@
   });
 
   document.addEventListener('DOMContentLoaded', () => {
-    renderChat(languageSelect.value || 'en');
+    renderChat(languageSelect.value || 'en-GB');
   });
 
 })(); // Correctly close the IIFE
