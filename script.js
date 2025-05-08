@@ -75,34 +75,37 @@ document.addEventListener('DOMContentLoaded', () => {
       token
     });
 
-    // 5d) Create a store that dispatches our two events on CONNECT_FULFILLED
-    const store = window.WebChat.createStore(
-      {},
-      ({ dispatch }) => next => action => {
-        if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
-          // 1) Initialize globals
-          dispatch({
-            type: 'WEB_CHAT/SEND_EVENT',
-            payload: {
-              name: 'pvaSetContext',
-              value: {
-                'marketCode': currentMarketCode,
-                'testCode':   currentTestCode
-              }
+    // 5d) Create a store that dispatches ONLY pvaSetContext on CONNECT_FULFILLED
+  const store = window.WebChat.createStore(
+    {},
+    ({ dispatch }) => next => action => {
+      if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+        // 1) Initialize globals (This is CORRECT and RECOMMENDED)
+        dispatch({
+          type: 'WEB_CHAT/SEND_EVENT',
+          payload: {
+            name: 'pvaSetContext',
+            value: {
+              'marketCode': currentMarketCode,
+              'testCode':   currentTestCode
             }
-          });
+          }
+        });
+        console.log('pvaSetContext dispatched via store.'); // Added console log for confirmation
 
-          // 2) Trigger the built-in Conversation Start
-          dispatch({
-            type: 'WEB_CHAT/SEND_EVENT',
-            payload: {
-              name: 'webchat/join',
-              value: {}
-            }
-          });
-        }
+        // 2) Trigger the built-in Conversation Start (REMOVE THIS BLOCK)
+        /*
+        dispatch({
+          type: 'WEB_CHAT/SEND_EVENT',
+          payload: {
+            name: 'webchat/join', // This event is not standard for triggering Conversation Start
+            value: {}
+          }
+        });
+        */
+      }
 
-        return next(action);
+      return next(action);
       }
     );
 
