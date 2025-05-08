@@ -157,14 +157,15 @@
     // Send the 'startConversation' event to the bot including initial settings
     directLine.postActivity({
       type: 'event',              // Activity type is 'event'
-      name: 'startConversation',  // Event name (standard for PVA/Copilot on start)
-      locale,                     // Current locale
+      name: 'pvaSetContext',  // Event name (standard for PVA/Copilot on start)
+      locale: locale,                     // Current locale
       localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Current timezone
       value: {                    // Optional data object to send with the event
-        Global: {                 // Structure based on how your bot expects data
           marketCode: currentMarketCode // The current market value at start
-        }
       }
+    }).subscribe({
+      next: (id) => console.log("pvaSetContext activity skickad med ID: ", id),
+      error: (err) => console.error('Misslyckades med att skicka pvaSetContext activity:', err)
     });
   }
 
