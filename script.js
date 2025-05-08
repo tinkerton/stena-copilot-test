@@ -1,25 +1,25 @@
 // script.js
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1) DOM elements
+  // 1) Grab your DOM elements
   const chatButton  = document.getElementById('chat-button');
   const chatWrapper = document.getElementById('chat-wrapper');
   const webchatDiv  = document.getElementById('webchat');
 
   if (!chatButton || !chatWrapper || !webchatDiv) {
-    console.error('Missing required chat DOM elements');
+    console.error('Missing chat DOM elements');
     return;
   }
 
-  // 2) Hard-coded context values
-  const currentLanguage   = 'sv-SE';
+  // 2) Your hard-coded context values
   const currentMarketCode = 'se';
-  const currentTestCode   = 'se'; // your testCode value
+  const currentTestCode   = 'se';
+  const currentLanguage   = 'sv-SE';
 
   let chatInitialized = false;
   let directLine;
 
-  // 3) On icon click, show chat and initialize once
+  // 3) Show chat & init on click
   chatButton.addEventListener('click', async () => {
     chatWrapper.style.display = 'block';
     chatButton.style.display = 'none';
@@ -42,22 +42,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 5) Initialize Web Chat & send globals via store
+  // 5) Bootstraps Web Chat, sends both pvaSetContext + webchat/join
   async function initChat() {
-    // 5a) Build token URL
+    // 5a) Build token endpoint URL
     const tokenEndpointURL = new URL(
       'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
       'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
     );
     const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
-    // 5b) Fetch DirectLine URL & token
+    // 5b) Fetch DirectLine URL & token in parallel
     let directLineURL, token;
     try {
       [ directLineURL, token ] = await Promise.all([
         fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
           .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
           .then(json => json.channelUrlsById.directline),
+
         fetch(tokenEndpointURL)
           .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
           .then(json => json.token)
@@ -68,17 +69,18 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 5c) Create DirectLine
+    // 5c) Create the DirectLine client
     directLine = window.WebChat.createDirectLine({
       domain: `${directLineURL}/v3/directline`,
       token
     });
 
-    // 5d) Create store that sends pvaSetContext on connect
+    // 5d) Create a store that dispatches our two events on CONNECT_FULFILLED
     const store = window.WebChat.createStore(
       {},
       ({ dispatch }) => next => action => {
         if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+          // 1) Initialize globals
           dispatch({
             type: 'WEB_CHAT/SEND_EVENT',
             payload: {
@@ -89,12 +91,22 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             }
           });
+
+          // 2) Trigger the built-in Conversation Start
+          dispatch({
+            type: 'WEB_CHAT/SEND_EVENT',
+            payload: {
+              name: 'webchat/join',
+              value: {}
+            }
+          });
         }
+
         return next(action);
       }
     );
 
-    // 5e) Render Web Chat once
+    // 5e) Render Web Chat exactly once
     window.WebChat.renderWebChat(
       {
         directLine,
