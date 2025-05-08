@@ -1,116 +1,133 @@
-// Encapsulate code using an IIFE (Immediately Invoked Function Expression) to avoid global variables
-(async function() {
+// script.js
 
-  // === 1. Constants and UI Elements ===
-  // Get references to necessary HTML elements
+// === Entry point ===
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Get & validate DOM elements
   const languageSelect = document.getElementById('language-select');
-  const marketSelect = document.getElementById('market-select');
-  const chatButton = document.getElementById('chat-button');
-  const chatWrapper = document.getElementById('chat-wrapper');
+  const marketSelect   = document.getElementById('market-select');
+  const chatButton     = document.getElementById('chat-button');
+  const chatWrapper    = document.getElementById('chat-wrapper');
   const globalSettings = document.getElementById('global-settings');
+  const webchatDiv     = document.getElementById('webchat');
 
-  // DirectLine token endpoint URL for your Copilot/PVA instance
+  if (!languageSelect || !marketSelect || !chatButton || !chatWrapper || !globalSettings || !webchatDiv) {
+    console.error('Missing one or more required DOM elements.');
+    return;
+  }
+
+  // 2. Fetch DirectLine URL & token
   const tokenEndpointURL = new URL(
     'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
     'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
   );
   const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
-  // === 2. API/Initialization ===
-  const [directLineURL, token] = await Promise.all([
-    fetch(
-      new URL(
-        `/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`,
-        tokenEndpointURL
-      )
-    ).then(res => res.json()).then(json => json.channelUrlsById.directline),
-    fetch(tokenEndpointURL).then(res => res.json()).then(json => json.token)
-  ]);
+  let directLineURL, token;
+  try {
+    [ directLineURL, token ] = await Promise.all([
+      fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+        .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
+        .then(json => json.channelUrlsById.directline),
+      fetch(tokenEndpointURL)
+        .then(res => { if (!res.ok) throw new Error(res.status); return res.json(); })
+        .then(json => json.token)
+    ]);
+    if (!directLineURL || !token) {
+      throw new Error('DirectLine URL or token missing');
+    }
+  } catch (err) {
+    console.error('Initialization error:', err);
+    webchatDiv.innerHTML = '<p style="color: red; padding: 1em;">Chattfunktionen kunde inte laddas. Försök igen senare.</p>';
+    return;
+  }
 
+  // 3. Create DirectLine & style settings (once)
   const directLine = WebChat.createDirectLine({
-    domain: new URL('v3/directline', directLineURL),
+    domain: `${directLineURL}/v3/directline`,
     token
   });
 
-  // === 3. Styling Configuration ===
   const styleOptions = {
     hideUploadButton: true,
     accent: '#FF0000',
-    suggestedActionLayout: 'stacked',
+    suggestedActionLayout: 'stacked'
   };
 
   const styleSet = WebChat.createStyleSet(styleOptions);
-
   styleSet.bubbleFromBot = {
+    ...styleSet.bubbleFromBot,
     background: 'rgb(238, 238, 238)',
     margin: '7px 0 0 0',
-    width: 'auto',
     maxWidth: '100%',
     padding: '10px 14px',
     borderRadius: '10px 10px 10px 0px',
     whiteSpace: 'normal'
   };
-
   styleSet.suggestedActionsContainer = {
+    ...styleSet.suggestedActionsContainer,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    maxWidth: '380px',
-    width: '100%'
+    maxWidth: '380px'
   };
-
   styleSet.suggestedAction = {
+    ...styleSet.suggestedAction,
     width: '100%',
     backgroundColor: 'transparent',
     border: 'thin dashed rgb(212, 212, 212)',
     color: 'black',
-    minWidth: '100px',
-    margin: '10px 0 0 0',
     padding: '10px 14px',
     borderRadius: '20px',
     textAlign: 'center',
-    fontSize: '1em',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center'
   };
 
-  // === 4. Helper Functions ===
-  function renderChat(locale) {
-    document.documentElement.lang = locale;
-
-    const currentMarketCode = marketSelect.value.toLowerCase();
-
-    const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
+  // 4. Create store to send context + join event once on connect
+  const store = WebChat.createStore(
+    {},
+    ({ dispatch }) => next => action => {
       if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+        const mc = marketSelect.value.toLowerCase();
+        const ul = languageSelect.value || 'en-GB';
+
+        // a) Send context
         dispatch({
           type: 'WEB_CHAT/SEND_EVENT',
           payload: {
             name: 'pvaSetContext',
-            value: {
-              "marketCode": currentMarketCode
-            }
+            value: { marketCode: mc, userLocale: ul }
           }
         });
-        console.log('pvaSetContext event dispatched via store middleware for market:', currentMarketCode);
+
+        // b) Trigger welcome (OnConversationStart)
+        dispatch({
+          type: 'WEB_CHAT/SEND_EVENT',
+          payload: {
+            name: 'webchat/join',
+            value: {}
+          }
+        });
       }
       return next(action);
-    });
+    }
+  );
 
-    WebChat.renderWebChat(
-      {
-        directLine,
-        store,
-        locale,
-        styleOptions,
-        styleSet
-      },
-      document.getElementById('webchat')
-    );
-  }
+  // 5. Render Web Chat a single time
+  WebChat.renderWebChat(
+    {
+      directLine,
+      store,
+      locale: languageSelect.value || 'en-GB',
+      styleOptions,
+      styleSet
+    },
+    webchatDiv
+  );
 
-  // === 5. Event Handlers (UI Interaction) ===
+  // 6. UI Event handlers (only send events, do NOT re-render)
   chatButton.addEventListener('click', () => {
     chatWrapper.style.display = 'block';
     chatButton.style.display = 'none';
@@ -129,23 +146,36 @@
   });
 
   languageSelect.addEventListener('change', () => {
-    renderChat(languageSelect.value || 'en-GB');
-  });
+    const newLocale = languageSelect.value || 'en-GB';
+    document.documentElement.lang = newLocale;
 
-  marketSelect.addEventListener('change', () => {
     directLine.postActivity({
       type: 'event',
-      name: 'userSettings',
+      name: 'pvaSetContext',
       value: {
-        Global: {
-          marketCode: marketSelect.value.toLowerCase()
-        }
+        marketCode: marketSelect.value.toLowerCase(),
+        userLocale: newLocale
       }
+    }).subscribe({
+      next: id => console.log('pvaSetContext sent for locale change, id:', id),
+      error: err => console.error('Error sending pvaSetContext (locale):', err)
     });
   });
 
-  document.addEventListener('DOMContentLoaded', () => {
-    renderChat(languageSelect.value || 'en-GB');
-  });
+  marketSelect.addEventListener('change', () => {
+    const newMarket = marketSelect.value.toLowerCase();
+    const currentLocale = languageSelect.value || 'en-GB';
 
-})(); // Correctly close the IIFE
+    directLine.postActivity({
+      type: 'event',
+      name: 'pvaSetContext',
+      value: {
+        marketCode: newMarket,
+        userLocale: currentLocale
+      }
+    }).subscribe({
+      next: id => console.log('pvaSetContext sent for market change, id:', id),
+      error: err => console.error('Error sending pvaSetContext (market):', err)
+    });
+  });
+});
