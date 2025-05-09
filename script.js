@@ -188,7 +188,7 @@
     }
   });
 
-  
+  /*
 setTimeout(directLine.postActivity({
       type: 'event',
       name: 'userSettings', // Event name your bot listens for updates
@@ -197,7 +197,7 @@ setTimeout(directLine.postActivity({
             marketCode: 'EXTERNAL marketCode 2'
       }
     }),300);
-  
+  */
 
 
   // === 6. Entry Point ===
