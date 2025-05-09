@@ -223,36 +223,62 @@
             const apiVersion = new URL(tokenEndpointURL).searchParams.get('api-version');
 
 
+            const store = window.WebChat.createStore({},
+	        ({
+		        dispatch
+            }) => next => action => {
+                if (action.type === "DIRECT_LINE/CONNECT_FULFILLED") {
+                    new Promise(function(resolve) {
+                        dispatch({
+                            type: 'WEB_CHAT/SEND_EVENT',
+                            payload: {
+                                name: 'pvaSetContext',
+                                value: {
+                                    marketCode: window.location.href,
+                                    testCode:'ie-test',
+                                    'marketCode': 'se-test'
+                                },
+                            }
+                        });
+                        setTimeout(() => resolve(1), 1000);
+                    }).then(function(result) {
+                        dispatch({
+                            meta: {
+                                method: "keyboard",
+                            },
+                            payload: {
+                                activity: {
+                                    channelData: {
+                                        postBack: true,
+                                    },
+                                    name: "startConversation",
+                                    type: "event",
+                                },
+                            },
+                            type: "DIRECT_LINE/POST_ACTIVITY",
+                        })
+                    });
+                }
+                return next(action);
+            }
+        );
+
         fetch(tokenEndpointURL)
             .then(response => response.json())
             .then(conversationInfo => {
-                window.WebChat.renderWebChat(
-                    {
+                window.WebChat.renderWebChat({
                         directLine: window.WebChat.createDirectLine({
                             token: conversationInfo.token,
                         }),
-                        store,
-                        styleOptions
+                        // onTelemetry: 
+                        store: store,
+                        styleOptions: styleOptions
+
                     },
                     document.getElementById('webchat')
                 );
             })
             .catch(err => console.error("An error occurred: " + err));
-
-            const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
-                if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
-                dispatch({
-                    type: "WEB_CHAT/SEND_EVENT",
-                    payload: {
-                        name: "pvaSetContext",
-                        value: {
-                        "marketCode": "pl-test"
-                        }
-                    },
-                    });
-                }
-                return next(action);
-            });
 
             /*const directLine = WebChat.createDirectLine({
                 domain: new URL('v3/directline', directLineURL),
