@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contoso Sample Web Chat</title>
+    
+    <link rel="stylesheet" href="styles.css">
+    
+  </head>
+  <body class="background">
+    <div id="global-settings">
+      <select id="language-select" title="Select language">
+        <option value="en-GB">English</option> 1Has a comment.
+        <option value="sv-SE">Swedish</option>
+        <option value="nl-NL">Dutch</option>
+        <option value="pl-PL">Polish</option>
+      </select>
+      <select id="market-select" title="Select market">
+        <option value="uk">UK</option>
+        <option value="ie">IE</option>
+        <option value="se">SE</option>
+        <option value="nl">NL</option>
+        <option value="pl">PL</option>
+      </select>
+    </div>
+
+    <div id="chat-wrapper">
+      <div id="chat-header"><h1>Stina 2.0</h1></div>
+      <div id="webchat" role="main"></div>
+    </div>
+
+    <button id="chat-button" aria-label="Open chat">
+      <img src="chaticon.png" alt="Chat icon"/>
+    </button>
+
+    <script crossorigin="anonymous"
+            src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js">
+    </script>
+
+    <script src="script.js"></script>
+    
+  </body>
+</html>
