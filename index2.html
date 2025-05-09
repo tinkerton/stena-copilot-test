@@ -222,6 +222,8 @@
             const locale = document.documentElement.lang || 'en';
             const apiVersion = new URL(tokenEndpointURL).searchParams.get('api-version');
 
+            var BOT_ID = "8c9dc15c-0dce-484d-9278-c85c683f1855"; 
+ var theURL = "https://powerva.microsoft.com/api/botmanagement/v1/directline/directlinetoken?botId=" + BOT_ID;
 
             const store = window.WebChat.createStore({},
 	        ({
@@ -263,7 +265,7 @@
             }
         );
 
-        fetch(tokenEndpointURL)
+        fetch(theURL)
             .then(response => response.json())
             .then(conversationInfo => {
                 window.WebChat.renderWebChat({
