@@ -5,26 +5,38 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contoso Sample Web Chat</title>
-    
-    <link rel="stylesheet" href="styles.css">
-    
-  </head>
-  <body class="background">
 
+    <!-- 1. Bot Framework Web Chat styles -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.botframework.com/botframework-webchat/latest/webchat.css"
+    />
+
+    <!-- 2. Your custom styles (background, chat‐wrapper, chat‐button, etc.) -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body class="background">
+    <!-- 3. Chat container (initially hidden via CSS) -->
     <div id="chat-wrapper">
-      <div id="chat-header"><h1>Stina 2.0</h1></div>
+      <div id="chat-header">
+        <h1>Stina 2.0</h1>
+      </div>
       <div id="webchat" role="main"></div>
     </div>
 
+    <!-- 4. Chat icon button -->
     <button id="chat-button" aria-label="Open chat">
-      <img src="chaticon.png" alt="Chat icon"/>
+      <img src="chaticon.png" alt="Chat icon" />
     </button>
 
-    <script crossorigin="anonymous"
-            src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js">
-    </script>
+    <!-- 5. Bot Framework Web Chat script -->
+    <script
+      crossorigin="anonymous"
+      src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"
+    ></script>
 
+    <!-- 6. Your interaction logic -->
     <script src="script.js"></script>
-    
   </body>
 </html>
