@@ -3,11 +3,9 @@
 
   // === 1. Constants and UI Elements ===
   // Get references to necessary HTML elements
-  const languageSelect = document.getElementById('language-select');
-  const marketSelect = document.getElementById('market-select');
   const chatButton = document.getElementById('chat-button');
   const chatWrapper = document.getElementById('chat-wrapper');
-  const globalSettings = document.getElementById('global-settings');
+
 
   // DirectLine token endpoint URL for your Copilot/PVA instance
   const tokenEndpointURL = new URL(
