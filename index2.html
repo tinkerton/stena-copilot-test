@@ -168,7 +168,7 @@
           </svg>  
     </div>
     <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
-    <script>
+    <script nonce="@Model.ApplicationContext.Nonce">
         document.getElementById('chat-icon').addEventListener('click', function () {
             const chatContainer = document.getElementById('chat-container');
             const chatIcon = document.getElementById('chat-icon');
@@ -225,50 +225,54 @@
             var BOT_ID = "8c9dc15c-0dce-484d-9278-c85c683f1855"; 
  var theURL = "https://powerva.microsoft.com/api/botmanagement/v1/directline/directlinetoken?botId=" + BOT_ID;
 
-            const store = window.WebChat.createStore({},
-	        ({
-		        dispatch
-            }) => next => action => {
-                if (action.type === "DIRECT_LINE/CONNECT_FULFILLED") {
-                    new Promise(function(resolve) {
-                        dispatch({
-                            type: 'WEB_CHAT/SEND_EVENT',
-                            payload: {
-                                name: 'pvaSetContext',
-                                value: {
-                                    marketCode: window.location.href,
-                                    testCode:'ie-test',
-                                    'marketCode': 'se-test'
-                                },
-                            }
-                        });
-                        setTimeout(() => resolve(1), 1000);
-                    }).then(function(result) {
-                        dispatch({
-                            meta: {
-                                method: "keyboard",
-                            },
-                            payload: {
-                                activity: {
-                                    channelData: {
-                                        postBack: true,
-                                    },
-                                    name: "startConversation",
-                                    type: "event",
-                                },
-                            },
-                            type: "DIRECT_LINE/POST_ACTIVITY",
-                        })
-                    });
-                }
-                return next(action);
-            }
-        );
 
-        fetch(theURL)
-            .then(response => response.json())
-            .then(conversationInfo => {
-                window.WebChat.renderWebChat({
+
+
+
+
+
+
+
+ 
+            const store = window.WebChat.createStore({},
+	        ({ dispatch }) => next => action => {
+                        const { type } = action;
+
+
+                        if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+                            const actions = [
+                                {
+                                    type: "WEB_CHAT/SEND_EVENT",
+                                    payload: {
+                                        name: "pvaSetContext",
+                                        value: {
+                                           marketCode:'en-test'
+                                        }
+                                    },
+                                },
+                                {
+                                    type: "DIRECT_LINE/POST_ACTIVITY",
+                                    meta: {
+                                        method: "keyboard",
+                                    },
+                                    payload: {
+                                        activity: {
+                                            channelData: {
+                                                postBack: true,
+                                            },
+                                            name: 'startConversation',
+                                            type: "event"
+                                        },
+                                    },
+                                }
+                            ];
+                            next(action);
+
+                            
+            }
+         });
+        
+         window.WebChat.renderWebChat({
                         directLine: window.WebChat.createDirectLine({
                             token: conversationInfo.token,
                         }),
