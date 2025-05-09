@@ -270,7 +270,8 @@
 
                             
             }
-         });
+         }
+        );
         
          window.WebChat.renderWebChat({
                         directLine: window.WebChat.createDirectLine({
@@ -282,8 +283,7 @@
 
                     },
                     document.getElementById('webchat')
-                );
-            })
+                )
             .catch(err => console.error("An error occurred: " + err));
 
             /*const directLine = WebChat.createDirectLine({
@@ -312,8 +312,7 @@
                 styleOptions
             }, document.getElementById('webchat'));
             */
-        })
-            ();
+        });
     </script>
 </body>
 
