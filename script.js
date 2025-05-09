@@ -12,8 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 2) Your hard-coded context values
-  const currentMarketCode = 'ie';
-  const currentTestCode   = 'ie';
+  const currentMarketCode = 'ie-testmarket';
+  const currentTestCode   = 'ie-testcode';
   const currentLanguage   = 'en-IE';
 
   let chatInitialized = false;
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5a) Build token endpoint URL
     const tokenEndpointURL = new URL(
       'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
-      'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
+      'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2024-10-01'
     );
     const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
           payload: {
             name: 'pvaSetContext',
             value: {
-              'marketCode': 'ie2', //marketCode
+              'marketCode': marketCode
               'testCode':   currentTestCode
             }
           }
