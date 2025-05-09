@@ -181,7 +181,7 @@
         </svg>
     </div>
     <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
-    <script nonce="@Model.ApplicationContext.Nonce">
+    <script>
         document.getElementById('chat-icon').addEventListener('click', function () {
             const chatContainer = document.getElementById('chat-container');
             const chatIcon = document.getElementById('chat-icon');
@@ -231,64 +231,48 @@
                 hideUploadButton: true,
             };
 
-            const tokenEndpointURL = 'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
+           // const tokenEndpointURL = 'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
             const locale = document.documentElement.lang || 'en';
-            const apiVersion = new URL(tokenEndpointURL).searchParams.get('api-version');
+            //const apiVersion = new URL(tokenEndpointURL).searchParams.get('api-version');
 
-            var BOT_ID = "8c9dc15c-0dce-484d-9278-c85c683f1855";
+            //var BOT_ID = "8c9dc15c-0dce-484d-9278-c85c683f1855";
             var theURL = "https://powerva.microsoft.com/api/botmanagement/v1/directline/directlinetoken?botId=" + BOT_ID;
 
             const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
                 if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
-                    const actions = [
-                        {
-                            type: "WEB_CHAT/SEND_EVENT",
-                            payload: {
-                                name: "pvaSetContext",
-                                value: {
-                                    'marketCode': '1en-test',
-                                    marketCode: '2se-test',
-                                }
-                            },
-                        },
-                        {
-                            type: "DIRECT_LINE/POST_ACTIVITY",
-                            meta: {
-                                method: "keyboard",
-                            },
-                            payload: {
-                                activity: {
-                                    channelData: {
-                                        postBack: true,
-                                    },
-                                    name: 'startConversation',
-                                    type: "event"
-                                },
-                            },
-                        }
-                    ];
-                    next(action)
-                        .catch(err => console.error("1 An error occurred: " + err));
+                  dispatch({
+                     type: "WEB_CHAT/SEND_EVENT",
+                     payload: {
+                       name: "pvaSetContext",
+                       value: {
+                          "marketCode": "variableDefinition1",
+                          "variableName2": "variableDefinition2"
+                       }
+                     },
+                   });
+                 }
+                   return next(action);
+               });
+
+               const BOT_ID = "d0f54380-c99d-4abc-91fc-fd90195263ec";
+               const theURL = "https://powerva.microsoft.com/api/botmanagement/v1/directline/directlinetoken?botId=" + BOT_ID;
+               
+               fetch(theURL)
+                   .then(response => response.json())
+                   .then(conversationInfo => {
+                       window.WebChat.renderWebChat(
+                           {
+                               directLine: window.WebChat.createDirectLine({
+                                   token: conversationInfo.token,
+                               }),
+                               store,
+                               styleOptions
+                           },
+                           document.getElementById('webchat')
+                       );
+                   })
+                   .catch(err => console.error("An error occurred: " + err));
                 }
-            
-                fetch(theURL)
-            .then(response => response.json())
-            .then(conversationInfo => {
-                window.WebChat.renderWebChat(
-                    {
-                        directLine: window.WebChat.createDirectLine({
-                            token: conversationInfo.token,
-                        }),
-                        store,
-                        styleOptions
-                    },
-                    document.getElementById('webchat')
-                );
-            })
-            .catch(err => console.error("An error occurred: " + err));
-
-            
-
 
 
 
@@ -331,9 +315,9 @@
                             .catch(err => console.error("1 An error occurred: " + err));
 
 
-                    }*/
+                    }
                 }
-            );
+            );*/
 /*
             window.WebChat.renderWebChat({
                 directLine: window.WebChat.createDirectLine({
@@ -374,7 +358,7 @@
                 styleOptions
             }, document.getElementById('webchat'));
             */
-        });
+        
     </script>
 </body>
 
