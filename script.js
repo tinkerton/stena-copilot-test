@@ -95,15 +95,15 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('pvaSetContext dispatched via store.'); // Added console log for confirmation
 
         // 2) Trigger the built-in Conversation Start (REMOVE THIS BLOCK)
-        /*
+        
         dispatch({
           type: 'WEB_CHAT/SEND_EVENT',
           payload: {
             name: 'webchat/join', // This event is not standard for triggering Conversation Start
-            value: {}
+            value: {marketCode:'join'}
           }
         });
-        */
+        
       }
 
       return next(action);
