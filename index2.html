@@ -241,6 +241,22 @@
                     .then(({ token }) => token)
             ]);
 
+
+            const store = WebChat.createStore({}, ({ dispatch }) => next => action => {
+                if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+                dispatch({
+                    type: "WEB_CHAT/SEND_EVENT",
+                    payload: {
+                        name: "pvaSetContext",
+                        value: {
+                        "marketCode": "pl-test"
+                        }
+                    },
+                    });
+                }
+                return next(action);
+            });
+
             const directLine = WebChat.createDirectLine({
                 domain: new URL('v3/directline', directLineURL),
                 token
@@ -253,9 +269,7 @@
                             localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                             locale,
                             name: 'startConversation',
-                            type: 'event',
-                            value: {'marketCode':"pl"},
-                            marketCode:'nl'
+                            type: 'event'
                         }).subscribe();
                         subscription.unsubscribe();
                     }
@@ -265,6 +279,7 @@
             WebChat.renderWebChat({
                 directLine,
                 locale,
+                store,
                 styleOptions
             }, document.getElementById('webchat'));
         })();
