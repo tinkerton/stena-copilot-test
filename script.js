@@ -136,9 +136,7 @@
   // === 4. Helper Functions ===
   // Renders the Web Chat with the specified locale and sends initial marketCode
   function renderChat(locale) {
-    document.documentElement.lang = locale; // Set page language attribute
-
-    const currentMarketCode = marketSelect.value.toLowerCase(); // Get current market selection
+    document.documentElement.lang = locale || "en"; // Set page language attribute
 
     // Render the Web Chat control into the div with id="webchat"
     WebChat.renderWebChat(
@@ -159,7 +157,7 @@
       locale: locale,                     // Current locale
       localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Current timezone
       value: {                    // Optional data object to send with the event
-          marketCode: currentMarketCode // The current market value at start
+          marketCode: 'EXTERNAL MARKET 0" // The current market value at start
       }
     }).subscribe({
       next: (id) => console.log("pvaSetContext activity skickad med ID: ", id),
