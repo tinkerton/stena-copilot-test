@@ -5,146 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stena Line Copilot Chat Test</title>
   <meta name="robots" content="noindex, nofollow" />
-
-  <script>
-    const password = prompt("Please enter password:");
-    if (password !== "stina2025") {
-      document.write("<h1 style='color:red;text-align:center;margin-top:20%'>Access Denied</h1>");
-      throw new Error("Unauthorized access");
-    }
-  </script>
-
   <style>
-    /* Reset & base fonts */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
     html, body {
       margin: 0;
       padding: 0;
       width: 100%;
-      height: 100%;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: sans-serif;
+    }
+    body {
       background-color: #fff;
     }
-
-    /* Full‐page background (your existing image) */
     .background {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      aspect-ratio: 3220/11844;
       background: url('stenaline-website.png') no-repeat top center;
-      background-size: cover;
-      z-index: 0;
+      background-size: 100% auto;
+      width: 100%;
+      aspect-ratio: 3220 / 11844;
     }
-
-    /* Market & Language selector */
     #language-selector {
       position: fixed;
-      top: 20px;
+      top: 10px;
       right: 20px;
       z-index: 1100;
-      background: rgba(255,255,255,0.95);
-      padding: 12px 16px;
-      border: 2px solid #002f87;
+      background: white;
+      padding: 10px;
       border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      color: #002f87;
-      font-size: 14px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    #language-selector label {
-      margin-right: 4px;
-      font-weight: 600;
-    }
-    #language-selector select {
-      appearance: none;
-      border: 1px solid #002f87;
-      border-radius: 4px;
-      padding: 4px 8px;
-      background: #fff;
-      color: #002f87;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    #language-selector select:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(0,47,135,0.3);
-    }
-
-    /* Chat launcher button */
     #copilot-chat-launcher {
       position: fixed;
       bottom: 20px;
       right: 20px;
       z-index: 1000;
-      width: 60px;
-      height: 60px;
-      background-color: #002f87;
-      color: #ffffff;
+      background-color: #006bb6;
+      color: white;
       border: none;
       border-radius: 50%;
-      font-size: 28px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 60px;
+      height: 60px;
+      font-size: 30px;
       cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      transition: background-color 0.2s;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
-    #copilot-chat-launcher:hover {
-      background-color: #001f5b;
-    }
-
-    /* Container around iframe + header */
-    #copilot-container {
+    #copilot-frame {
       position: fixed;
       bottom: 90px;
       right: 20px;
-      width: 380px;
-      height: 560px;
+      width: 400px;
+      height: 600px;
       display: none;
-      flex-direction: column;
-      border: 3px solid #e2231a;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-      background: #fff;
+      border: none;
       z-index: 1001;
-    }
-
-    /* Header bar above iframe */
-    #chat-header {
-      background-color: #002f87;
-      color: #fff;
-      padding: 12px 16px;
-      font-size: 16px;
-      font-weight: 600;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    #chat-header button {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 20px;
-      cursor: pointer;
-      line-height: 1;
-    }
-
-    /* The actual chat iframe */
-    #copilot-frame {
-      flex: 1;
-      border: none;
     }
   </style>
 </head>
 <body>
-  <!-- Market & Language Panel -->
   <div id="language-selector">
     <label for="market">Market:</label>
     <select id="market">
@@ -163,49 +77,29 @@
     </select>
   </div>
 
-  <!-- Background -->
   <div class="background"></div>
-
-  <!-- Chat launcher -->
-  <button id="copilot-chat-launcher" aria-label="Open chat">💬</button>
-
-  <!-- Chat container with header + iframe -->
-  <div id="copilot-container">
-    <div id="chat-header">
-      <span>Stina 2.0</span>
-      <button id="chat-close" aria-label="Close chat">×</button>
-    </div>
-    <iframe id="copilot-frame" title="Copilot Chat"></iframe>
-  </div>
+  <button id="copilot-chat-launcher">💬</button>
+  <iframe id="copilot-frame"></iframe>
 
   <script>
     const launcher = document.getElementById("copilot-chat-launcher");
-    const closer   = document.getElementById("chat-close");
-    const market   = document.getElementById("market");
-    const language = document.getElementById("language");
-    const container= document.getElementById("copilot-container");
-    const frame    = document.getElementById("copilot-frame");
+    const marketSelector = document.getElementById("market");
+    const languageSelector = document.getElementById("language");
+    const chatFrame = document.getElementById("copilot-frame");
 
-    let loaded = false;
+    let chatLoaded = false;
 
     launcher.addEventListener("click", () => {
-      // Build URL with selected market & language
-      const url = `https://copilotstudio.microsoft.com/environments/157c0ba0-05bf-48dd-b429-5b82e6a5976b/` +
-                  `bots/cre45_stinaCopilotPoc/webchat?__version__=2&market=${market.value}&language=${language.value}`;
+      const market = marketSelector.value;
+      const language = languageSelector.value;
 
-      if (!loaded) {
-        frame.src = url;
-        loaded = true;
+      const url = `https://copilotstudio.microsoft.com/environments/157c0ba0-05bf-48dd-b429-5b82e6a5976b/bots/cre45_stinaCopilotPoc/webchat?__version__=2&market=${market}&language=${language}`;
+
+      if (!chatLoaded) {
+        chatFrame.src = url;
+        chatLoaded = true;
       }
-
-      // Toggle container visibility
-      container.style.display = container.style.display === "flex" ? "none" : "flex";
-      launcher.style.display  = container.style.display === "flex" ? "none" : "flex";
-    });
-
-    closer.addEventListener("click", () => {
-      container.style.display = "none";
-      launcher.style.display  = "flex";
+      chatFrame.style.display = chatFrame.style.display === "none" ? "block" : "none";
     });
   </script>
 </body>
