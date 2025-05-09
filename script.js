@@ -190,23 +190,16 @@
     }
   });
 
-  // On language dropdown change, re-render the chat with the new locale (restarts conversation)
-  languageSelect.addEventListener('change', () => {
-    renderChat(languageSelect.value);
-  });
-
-  // On market dropdown change AFTER start, send a 'userSettings' event to the bot
-  marketSelect.addEventListener('change', () => {
-    directLine.postActivity({
+  
+setTimeout(directLine.postActivity({
       type: 'event',
       name: 'userSettings', // Event name your bot listens for updates
       value: {
-        Global: {
-           marketCode: marketSelect.value.toLowerCase() // Send the new value
-        }
+           'marketCode': 'EXTERNAL marketCode', // Send the new value
+            marketCode: 'EXTERNAL marketCode 2'
       }
-    });
-  });
+    }),300);
+  
 
 
   // === 6. Entry Point ===
