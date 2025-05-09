@@ -157,7 +157,8 @@
       locale: locale,                     // Current locale
       localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Current timezone
       value: {                    // Optional data object to send with the event
-          marketCode: 'EXTERNAL MARKET 0" // The current market value at start
+          marketCode: 'EXTERNAL MARKET 0', // The current market value at start
+          'marketCode': 'EXTERNAL MARKET A'
       }
     }).subscribe({
       next: (id) => console.log("pvaSetContext activity skickad med ID: ", id),
