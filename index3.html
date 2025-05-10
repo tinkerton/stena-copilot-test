@@ -183,7 +183,7 @@
         });
         // Market change event
         marketSelect.addEventListener('change', () => {
-          directLine.postActivity({ type: 'event', name: 'userSettings', value: { Global: { market: marketSelect.value } } }).subscribe();
+          directLine.postActivity({ type: 'event', name: 'userSettings', value: { marketCode: marketSelect.value }}).subscribe();
         });
       })();
     </script>
