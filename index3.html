@@ -94,7 +94,8 @@
       const market = marketSelector.value;
       const language = languageSelector.value;
 
-      const url = https://copilotstudio.microsoft.com/environments/157c0ba0-05bf-48dd-b429-5b82e6a5976b/bots/cre45_stinaCopilotPoc/webchat?__version__=2&market=${market}&language=${language};
+      const url = " 'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
+    'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'+'&marketCode='+${market};
 
       if (!chatLoaded) {
         chatFrame.src = url;
