@@ -25,8 +25,12 @@
     <script>
       (async function() {
         //efter directline: /token?api-version=2022-03-01-preview
-        const res = await fetch('https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline', { method: 'POST' });
+        //const res = await fetch('https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline', { method: 'POST' });
         //const res = await fetch('https://hawo-mockbot4-token-app.blueriver-ce85e8f0.westus.azurecontainerapps.io/api/token/directline', { method: 'POST' });
+        const BOT_ID = "8c9dc15c-0dce-484d-9278-c85c683f1855";
+        const theURL = "https://powerva.microsoft.com/api/botmanagement/v1/directline/directlinetoken?botId=" + BOT_ID;
+        const res = await fetch(theURL);
+        
         const { token } = await res.json();
 
         const store = window.WebChat.createStore({}, ({ dispatch }) => next => action => {
