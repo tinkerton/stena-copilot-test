@@ -1,42 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contoso Sample Web Chat</title>
+<script>
+  (async function() {
+    // 1) Grab your DOM elements once
+    const languageSelect = document.getElementById('language-select');
+    const marketSelect   = document.getElementById('market-select');
+    const chatButton     = document.getElementById('chat-button');
+    const chatWrapper    = document.getElementById('chat-wrapper');
+    const webchatDiv     = document.getElementById('webchat');
 
-    <!-- 1. Bot Framework Web Chat styles -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.botframework.com/botframework-webchat/latest/webchat.css"
-    />
+    // 2) Common styleOptions / styleSet
+    const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
+    const styleSet     = WebChat.createStyleSet(styleOptions);
+    // …apply your bubbleFromBot, suggestedActionsContainer, suggestedAction overrides here…
 
-    <!-- 2. Your custom styles (background, chat‐wrapper, chat‐button, etc.) -->
-    <link rel="stylesheet" href="styles.css" />
-  </head>
+    // 3) Token endpoint base URL
+    const tokenEndpointURL = new URL(
+      'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
+      'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?' +
+      'api-version=2022-03-01-preview'
+    );
+    const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
-  <body class="background">
-    <!-- 3. Chat container (initially hidden via CSS) -->
-    <div id="chat-wrapper">
-      <div id="chat-header">
-        <h1>Stina 2.0</h1>
-      </div>
-      <div id="webchat" role="main"></div>
-    </div>
+    // 4) A function to create (or re-create) the chat
+    async function initializeChat(locale, marketCode) {
+      // 4.1 Clear and unmount existing chat
+      webchatDiv.innerHTML = '';
+      if (window.currentDirectLine) {
+        window.currentDirectLine.end();       // close socket
+      }
 
-    <!-- 4. Chat icon button -->
-    <button id="chat-button" aria-label="Open chat">
-      <img src="chaticon.png" alt="Chat icon" />
-    </button>
+      // 4.2 Fetch new token & directLine URL
+      const [directLineURL, { token }] = await Promise.all([
+        fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+          .then(r => r.json())
+          .then(j => j.channelUrlsById.directline),
+        fetch(tokenEndpointURL)
+          .then(r => r.json())
+      ]);
 
-    <!-- 5. Bot Framework Web Chat script -->
-    <script
-      crossorigin="anonymous"
-      src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"
-    ></script>
+      // 4.3 Create a fresh DirectLine instance
+      const directLine = WebChat.createDirectLine({
+        domain: new URL('v3/directline', directLineURL),
+        token
+      });
+      window.currentDirectLine = directLine;  // keep reference so we can .end()
 
-    <!-- 6. Your interaction logic -->
-    <script src="script.js"></script>
-  </body>
-</html>
+      // 4.4 On connect: start conversation + set global context
+      directLine.connectionStatus$.subscribe(({ value }) => {
+        if (value === 2) {
+          directLine.postActivity({
+            type: 'event',
+            name: 'startConversation',
+            locale,
+            localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          }).subscribe();
+
+          directLine.postActivity({
+            type: 'event',
+            name: 'pvaSetContext',
+            value: { marketCode, userLocale: locale }
+          }).subscribe();
+        }
+      });
+
+      // 4.5 Render Web Chat
+      WebChat.renderWebChat(
+        { directLine, locale, styleOptions, styleSet },
+        webchatDiv
+      );
+    }
+
+    // 5) Initial chat creation on page load
+    await initializeChat(
+      languageSelect.value || 'en-GB',
+      marketSelect.value   || 'SE'
+    );
+
+    // 6) UI handlers (show/hide)
+    chatButton.addEventListener('click', () => {
+      chatWrapper.style.display = 'block';
+      chatButton.style.display  = 'none';
+    });
+    document.addEventListener('click', e => {
+      if (
+        chatWrapper.style.display === 'block' &&
+        !chatWrapper.contains(e.target) &&
+        !chatButton.contains(e.target)
+      ) {
+        chatWrapper.style.display = 'none';
+        chatButton.style.display  = 'flex';
+      }
+    });
+
+    // 7) Re-create chat on language change
+    languageSelect.addEventListener('change', () => {
+      initializeChat(languageSelect.value, marketSelect.value);
+    });
+
+    // 8) Or if you only want to change market without restarting
+    marketSelect.addEventListener('change', () => {
+      if (window.currentDirectLine) {
+        window.currentDirectLine.postActivity({
+          type: 'event',
+          name: 'pvaSetContext',
+          value: { marketCode: marketSelect.value }
+        }).subscribe();
+      }
+    });
+  })();
+</script>
