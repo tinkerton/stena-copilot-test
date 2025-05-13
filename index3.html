@@ -71,11 +71,11 @@
   <body class="background">
     <div id="global-settings">
       <select id="language-select" title="Select language">
-        <option value="en">English</option>
-        <option value="sv">Swedish</option>
-        <option value="nl">Dutch</option>
-        <option value="pl">Polish</option>
-      </select>
+        <option value="en-GB">English</option>
+        <option value="sv-SE">Svenska</option>
+        <option value="nl-NL">Nederlands</option>
+        <option value="pl-PL">Polski</option>
+    </select>
       <select id="market-select" title="Select market">
         <option value="uk">UK</option>
         <option value="ie">IE</option>
@@ -95,6 +95,13 @@
     <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
     <script>
       (async function() {
+
+        // UI handlers
+        const chatButton = document.getElementById('chat-button');
+        const chatWrapper = document.getElementById('chat-wrapper');
+        const languageSelect = document.getElementById('language-select');
+        const marketSelect = document.getElementById('market-select');
+
         // Base style options
         const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
         const styleSet = WebChat.createStyleSet(styleOptions);
@@ -156,7 +163,7 @@
         const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
         directLine.connectionStatus$.subscribe({ next: v => {
           if (v === 2) {
-            directLine.postActivity({ type: 'event', name: 'startConversation', locale: document.documentElement.lang || 'en', localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }).subscribe();
+            directLine.postActivity({ type: 'event', name: 'startConversation', locale: languageSelect.value || 'en', localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }).subscribe();
             directLine.postActivity({
               type: 'event',
               name: 'pvaSetContext',
@@ -166,13 +173,9 @@
         }});
 
         // Render Web Chat
-        WebChat.renderWebChat({ directLine, locale: document.documentElement.lang || 'en', styleOptions, styleSet }, document.getElementById('webchat'));
+        WebChat.renderWebChat({ directLine, locale: languageSelect.value || 'en', styleOptions, styleSet }, document.getElementById('webchat'));
 
-        // UI handlers
-        const chatButton = document.getElementById('chat-button');
-        const chatWrapper = document.getElementById('chat-wrapper');
-        const languageSelect = document.getElementById('language-select');
-        const marketSelect = document.getElementById('market-select');
+        
 
         // Toggle chat visibility
         chatButton.addEventListener('click', () => { chatWrapper.style.display = 'block'; chatButton.style.display = 'none'; });
@@ -184,11 +187,24 @@
 
         // Language change event  - changed userSettings to pvaSetContext
         languageSelect.addEventListener('change', () => {
+          const newLocale = languageSelect.value; // e.g. "sv-SE"
+
+          // 1️⃣ Tell Web Chat to switch its UI texts
+          WebChat.renderWebChat(
+            {
+              directLine,
+              locale: newLocale,            // ← sets Web Chat button/text language
+              styleOptions,
+              styleSet
+            },
+            document.getElementById('webchat')
+          );
+
           directLine
             .postActivity({
               type: 'event',
               name: 'pvaSetContext',
-              value: { userLocale: languageSelect.value }
+              value: { userLocale: newLocale}
             })  // <-- close postActivity argument here
             .subscribe();
         });
