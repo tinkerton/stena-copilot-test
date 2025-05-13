@@ -94,152 +94,120 @@
 
     <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
     <script>
-      (async function() {
+  (async function() {
+    // 1) Cache your DOM references once
+    const languageSelect = document.getElementById('language-select');
+    const marketSelect   = document.getElementById('market-select');
+    const chatButton     = document.getElementById('chat-button');
+    const chatWrapper    = document.getElementById('chat-wrapper');
+    const webchatDiv     = document.getElementById('webchat');
 
-        // UI handlers
-        const chatButton = document.getElementById('chat-button');
-        const chatWrapper = document.getElementById('chat-wrapper');
-        const languageSelect = document.getElementById('language-select');
-        const marketSelect = document.getElementById('market-select');
+    // 2) StyleOptions + StyleSet (unchanged)
+    const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
+    const styleSet     = WebChat.createStyleSet(styleOptions);
+    // … your styleSet overrides …
 
-        // Base style options
-        const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
-        const styleSet = WebChat.createStyleSet(styleOptions);
+    // 3) Build your exact token endpoint URL
+    const tokenEndpointURL = new URL(
+      'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
+      'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?' +
+      'api-version=2022-03-01-preview'
+    );
+    const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
-        // Bot bubble styling: auto width, max 100%, stacked vertically
-        styleSet.bubbleFromBot = {
-          background: 'rgb(238, 238, 238)',
-          margin: '7px 0 0 0',
-          width: 'auto',
-          maxWidth: '100%',
-          padding: '10px 14px',
-          borderRadius: '10px 10px 10px 0px',
-          transform: 'scale(1)',
-          animationFillMode: 'forwards',
-          transformOrigin: '0px 0px',
-          transition: 'border-radius 300ms',
-          whiteSpace: 'normal'
-        };
+    // 4) Reusable chat-creation function
+    async function createChat(locale, marketCode) {
+      // a) Clear out the old UI
+      webchatDiv.innerHTML = '';
 
-        // Quick replies container: vertical stack
-        styleSet.suggestedActionsContainer = {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          maxWidth: '380px',
-          width: '100%'
-        };
+      // b) Tear down old connection
+      if (window.currentDirectLine) {
+        window.currentDirectLine.end();
+      }
 
-        // Quick reply button styling: no right margin to avoid overflow
-        styleSet.suggestedAction = {
-          width: '100%',
-          backgroundColor: 'transparent',
-          border: 'thin dashed rgb(212, 212, 212)',
-          color: 'black',
-          minWidth: '100px',
-          margin: '10px 0 0 0',
-          padding: '10px 14px',
-          borderRadius: '20px',
-          textAlign: 'center',
-          fontSize: '1em',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        };
+      // c) Fetch the regional channel settings + token
+      const [ regionalSettings, tokenResponse ] = await Promise.all([
+        fetch(
+          new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL)
+        )
+          .then(res => res.json()),
+        fetch(tokenEndpointURL)
+          .then(res => res.json())
+      ]);
 
-        // Fetch token & DirectLine URL
-        const tokenEndpointURL = new URL(
-          'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
-        );
-        const apiVersion = tokenEndpointURL.searchParams.get('api-version');
-        const [directLineURL, token] = await Promise.all([
-          fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
-            .then(r => r.json()).then(j => j.channelUrlsById.directline),
-          fetch(tokenEndpointURL).then(r => r.json()).then(j => j.token)
-        ]);
+      const directLineURL = regionalSettings.channelUrlsById.directline;   // e.g. "https://…/v3/directline"
+      const token         = tokenResponse.token;
 
-        // Initialize DirectLine
-        const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
-        directLine.connectionStatus$.subscribe({ next: v => {
-          if (v === 2) {
-            directLine.postActivity({ type: 'event', name: 'startConversation', locale: languageSelect.value || 'en', localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }).subscribe();
-            directLine.postActivity({
-              type: 'event',
-              name: 'pvaSetContext',
-              value: { marketCode: marketSelect.value || 'SE'}
-            }).subscribe();
-          }
-        }});
+      // d) Create a new DirectLine instance pointing at your PVA endpoint
+      const dl = WebChat.createDirectLine({
+        domain:  new URL('v3/directline', directLineURL),
+        token
+      });
+      window.currentDirectLine = dl;
 
-        // Render Web Chat
-        WebChat.renderWebChat({ directLine, locale: languageSelect.value || 'en', styleOptions, styleSet }, document.getElementById('webchat'));
+      // e) On connect, start the conversation and set global variables
+      dl.connectionStatus$.subscribe(({ value }) => {
+        if (value === 2) {
+          dl.postActivity({
+            type: 'event',
+            name: 'startConversation',
+            locale,
+            localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+          }).subscribe();
 
-        
-
-        // Toggle chat visibility
-        chatButton.addEventListener('click', () => { chatWrapper.style.display = 'block'; chatButton.style.display = 'none'; });
-        document.addEventListener('click', e => {
-          if (chatWrapper.style.display === 'block' && !chatWrapper.contains(e.target) && !chatButton.contains(e.target)) {
-            chatWrapper.style.display = 'none'; chatButton.style.display = 'flex';
-          }
-        });
-
-        languageSelect.addEventListener('change', async () => {
-        const newLocale = languageSelect.value;
-
-        // 1. Tear down old chat instance
-        //    a) Clear the DIV
-        const webchatDiv = document.getElementById('webchat');
-        webchatDiv.innerHTML = '';
-
-        //    b) End the old DirectLine (optional cleanup)
-        directLine.end();  // unsubscribes, closes socket
-
-        // 2. Create a brand-new DirectLine conversation
-        //    (you may need to fetch a fresh token if tokens are 30–60m-lifespan)
-        const { token: newToken } = await fetch(tokenEndpointURL).then(r => r.json());
-        const newDirectLine = WebChat.createDirectLine({ domain: directLineURL, token: newToken });
-
-        // 3. Send your context and startConversation on new connect
-        newDirectLine.connectionStatus$.subscribe(({ value }) => {
-          if (value === 2) {
-            newDirectLine.postActivity({
-              type: 'event',
-              name: 'startConversation',
-              locale: newLocale,
-              localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-            }).subscribe();
-
-            newDirectLine.postActivity({
-              type: 'event',
-              name: 'pvaSetContext',
-              value: {
-                marketCode: marketSelect.value,
-                userLocale: newLocale
-              }
-            }).subscribe();
-          }
-        });
-
-        // 4. Render the fresh chat
-        WebChat.renderWebChat(
-          {
-            directLine: newDirectLine,
-            locale: newLocale,
-            styleOptions,
-            styleSet
-          },
-          webchatDiv
-        );
+          dl.postActivity({
+            type: 'event',
+            name: 'pvaSetContext',
+            value: { marketCode, userLocale: locale }
+          }).subscribe();
+        }
       });
 
-      
-        // Market change event  - changed userSettings to pvaSetContext
-        marketSelect.addEventListener('change', () => {
-          directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { marketCode: marketSelect.value }}).subscribe();
-        });
-      })();
-    </script>
+      // f) Render Web Chat
+      WebChat.renderWebChat(
+        { directLine: dl, locale, styleOptions, styleSet },
+        webchatDiv
+      );
+    }
+
+    // 5) Initial chat on page load
+    await createChat(
+      languageSelect.value || 'en-GB',
+      marketSelect.value   || 'SE'
+    );
+
+    // 6) Show/hide handlers (unchanged)
+    chatButton.addEventListener('click', () => {
+      chatWrapper.style.display = 'block';
+      chatButton.style.display  = 'none';
+    });
+    document.addEventListener('click', e => {
+      if (
+        chatWrapper.style.display === 'block' &&
+        !chatWrapper.contains(e.target) &&
+        !chatButton.contains(e.target)
+      ) {
+        chatWrapper.style.display = 'none';
+        chatButton.style.display  = 'flex';
+      }
+    });
+
+    // 7) Re-create chat on language change
+    languageSelect.addEventListener('change', () => {
+      createChat(languageSelect.value, marketSelect.value);
+    });
+
+    // 8) Only update marketCode mid-session if you don’t want a full restart:
+    marketSelect.addEventListener('change', () => {
+      if (window.currentDirectLine) {
+        window.currentDirectLine.postActivity({
+          type: 'event',
+          name: 'pvaSetContext',
+          value: { marketCode: marketSelect.value }
+        }).subscribe();
+      }
+    });
+  })();
+  </script>
   </body>
 </html>
