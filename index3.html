@@ -184,7 +184,13 @@
 
         // Language change event  - changed userSettings to pvaSetContext
         languageSelect.addEventListener('change', () => {
-          directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { System: { 'User.Language': languageSelect.value } } }).subscribe();
+          directLine
+            .postActivity({
+              type: 'event',
+              name: 'pvaSetContext',
+              value: { userLocale: languageSelect.value }
+            })  // <-- close postActivity argument here
+            .subscribe();
         });
         // Market change event  - changed userSettings to pvaSetContext
         marketSelect.addEventListener('change', () => {
