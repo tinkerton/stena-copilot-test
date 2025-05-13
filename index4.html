@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+  </head>
+  <body>
+    <div id="webchat" role="main"></div>
+
+    <script>
+      const currentMarketCode = 'SE'; // Example: Replace with dynamic value
+
+      const store = window.WebChat.createStore({}, ({ dispatch }) => next => action => {
+        if (action.type === 'DIRECT_LINE/CONNECT_FULFILLED') {
+          dispatch({
+            type: 'WEB_CHAT/SEND_EVENT',
+            payload: {
+              name: 'pvaSetContext',
+              value: {
+                marketCode: currentMarketCode
+              }
+            }
+          });
+          console.log('Context sent: marketCode =', currentMarketCode);
+        }
+        return next(action);
+      });
+
+      // Replace this URL with your Direct Line Token endpoint
+      const BOT_ID = 'cre45_stinaCopilotPoc';
+      const tokenUrl = 'https://powerva.microsoft.com/api/botmanagement/v1/directline/directlinetoken?botId=' + BOT_ID;
+
+      fetch(tokenUrl)
+        .then(response => response.json())
+        .then(conversationInfo => {
+          window.WebChat.renderWebChat(
+            {
+              directLine: window.WebChat.createDirectLine({ token: conversationInfo.token }),
+              store,
+              locale: 'sv-SE', // optional
+              styleOptions: {
+                hideUploadButton: true
+              }
+            },
+            document.getElementById('webchat')
+          );
+        })
+        .catch(err => console.error('Failed to fetch token', err));
+    </script>
+  </body>
+</html>
