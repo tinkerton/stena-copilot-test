@@ -69,9 +69,24 @@
     </style>
   </head>
   <body class="background">
+    <!--<div id="global-settings">
+      <select id="language-select" title="Select language">
+        <option value="en-GB">English</option>
+        <option value="sv-SE">Svenska</option>
+        <option value="nl-NL">Nederlands</option>
+        <option value="pl-PL">Polski</option>
+    </select>
+      <select id="market-select" title="Select market">
+        <option value="uk">UK</option>
+        <option value="ie">IE</option>
+        <option value="se">SE</option>
+        <option value="nl">NL</option>
+        <option value="pl">PL</option>
+      </select>
+    </div>-->
 
     <div id="chat-wrapper">
-      <div id="chat-header"><h1>Stina 2.0 - English</h1></div>
+      <div id="chat-header"><h1>Stina 2.0 - Svenska</h1></div>
       <div id="webchat" role="main"></div>
     </div>
 
@@ -152,12 +167,18 @@
         const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
         directLine.connectionStatus$.subscribe({ next: v => {
           if (v === 2) {
-            directLine.postActivity({ type: 'event', name: 'startConversation', locale: CHAT_LANGUAGE, localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }).subscribe();
             directLine.postActivity({
               type: 'event',
               name: 'pvaSetContext',
-              value: { marketCode: CHAT_MARKET}
+              value: { locale: CHAT_LANGUAGE, marketCode: CHAT_MARKET}
             }).subscribe();
+            directLine.postActivity({ 
+              type: 'event', 
+              name: 'startConversation', 
+              locale: CHAT_LANGUAGE, 
+              localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone 
+            }).subscribe();
+            
           }
         }});
 
@@ -174,6 +195,40 @@
           }
         });
 
+        /*
+        // Language change event  - changed userSettings to pvaSetContext
+        languageSelect.addEventListener('change', () => {
+          const newLocale = languageSelect.value; // e.g. "sv-SE"
+          console.log("languageSelect: " +  languageSelect.value);
+          // 1️⃣ Tell Web Chat to switch its UI texts
+          WebChat.renderWebChat(
+            {
+              directLine,
+              locale: newLocale,            // ← sets Web Chat button/text language
+              styleOptions,
+              styleSet
+            },
+            document.getElementById('webchat')
+          );
+
+          directLine
+            .postActivity({
+              type: 'event',
+              name: 'pvaSetContext',
+              
+              value: {  System: {'User.Language': newLocale }, userLocale: newLocale, marketCode: marketSelect.value }
+            })  // <-- close postActivity argument here
+            .subscribe();
+        });
+        */
+       
+       /*
+        // Market change event  - changed userSettings to pvaSetContext
+        marketSelect.addEventListener('change', () => {
+          console.log("marketSelect: " +  marketSelect.value);
+          directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { marketCode: marketSelect.value }}).subscribe();
+        });
+        */
       })();
 
         
