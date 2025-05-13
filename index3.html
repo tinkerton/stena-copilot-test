@@ -211,7 +211,7 @@
         });
         // Market change event  - changed userSettings to pvaSetContext
         marketSelect.addEventListener('change', () => {
-          console.log("marketSelect " : +  marketSelect.value);
+          console.log("marketSelect: " +  marketSelect.value);
           directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { marketCode: marketSelect.value }}).subscribe();
         });
       })();
