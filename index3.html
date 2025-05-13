@@ -188,7 +188,7 @@
         // Language change event  - changed userSettings to pvaSetContext
         languageSelect.addEventListener('change', () => {
           const newLocale = languageSelect.value; // e.g. "sv-SE"
-          console.log("languageSelect " : +  languageSelect.value);
+          console.log("languageSelect: " +  languageSelect.value);
           // 1️⃣ Tell Web Chat to switch its UI texts
           WebChat.renderWebChat(
             {
@@ -204,7 +204,8 @@
             .postActivity({
               type: 'event',
               name: 'pvaSetContext',
-              value: { userLocale: newLocale, marketCode: marketSelect.value }
+              
+              value: {  System: {'User.Language': newLocale }, marketCode: marketSelect.value }
             })  // <-- close postActivity argument here
             .subscribe();
         });
