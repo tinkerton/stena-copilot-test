@@ -167,12 +167,18 @@
         const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
         directLine.connectionStatus$.subscribe({ next: v => {
           if (v === 2) {
-            directLine.postActivity({ type: 'event', name: 'startConversation', locale: CHAT_LANGUAGE, localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }).subscribe();
             directLine.postActivity({
               type: 'event',
               name: 'pvaSetContext',
-              value: { marketCode: CHAT_MARKET}
+              value: { locale: CHAT_LANGUAGE, marketCode: CHAT_MARKET}
             }).subscribe();
+            directLine.postActivity({ 
+              type: 'event', 
+              name: 'startConversation', 
+              locale: CHAT_LANGUAGE, 
+              localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone 
+            }).subscribe();
+            
           }
         }});
 
