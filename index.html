@@ -1,113 +1,49 @@
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contoso Sample Web Chat</title>
-    <style>
-      /* Page background */
-      html, body { height: 100%; margin: 0; }
-      .background { background: url('stenaline-website.png') no-repeat top center; background-size: 100% auto; width: 100%; aspect-ratio: 3220 / 11844; }
-
-      /* Global settings dropdowns */
-      #global-settings {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        display: flex;
-        gap: 10px;
-        z-index: 1000;
-      }
-      #global-settings select { height: 30px; font-size: 14px; }
-
-      /* Chat wrapper */
-      #chat-wrapper {
-        display: none;
-        position: fixed;
-        bottom: 50px;
-        right: 50px;
-        width: 350px;
-        height: 500px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #fff;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 500;
-      }
-      /* Chat header */
-      #chat-header {
-        background-color: #004a93;
-        color: white;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        padding: 0 10px;
-      }
-      #chat-header h1 { margin: 0; font-size: 16px; font-family: Segoe UI; }
-
-      /* Web Chat container, hide horizontal overflow */
-      #webchat { height: calc(100% - 50px); overflow-x: hidden; }
-
-      /* Chat toggle button */
-      #chat-button {
-        position: fixed;
-        bottom: 50px;
-        right: 50px;
-        width: 50px;
-        height: 50px;
-        background-color: #004a93;
-        border: none;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        z-index: 1000;
-      }
-      #chat-button img { width: 24px; height: 24px; }
-    </style>
-  </head>
-  <body class="background">
-    <div id="global-settings">
-      <select id="language-select" title="Select language">
-        <option value="en-GB">English</option>
-        <option value="sv-SE">Svenska</option>
-        <option value="nl-NL">Nederlands</option>
-        <option value="pl-PL">Polski</option>
+<head>
+  <meta charset="UTF-8" />
+  <title>Contoso Sample Web Chat</title>
+  <!-- your styles here -->
+</head>
+<body>
+  <div id="global-settings">
+    <select id="language-select" title="Select language">
+      <option value="en-GB">English</option>
+      <option value="sv-SE">Svenska</option>
+      <option value="nl-NL">Nederlands</option>
+      <option value="pl-PL">Polski</option>
     </select>
-      <select id="market-select" title="Select market">
-        <option value="uk">UK</option>
-        <option value="ie">IE</option>
-        <option value="se">SE</option>
-        <option value="nl">NL</option>
-        <option value="pl">PL</option>
-      </select>
-    </div>
+    <select id="market-select" title="Select market">
+      <option value="uk">UK</option>
+      <option value="ie">IE</option>
+      <option value="se">SE</option>
+      <option value="nl">NL</option>
+      <option value="pl">PL</option>
+    </select>
+  </div>
 
-    <div id="chat-wrapper">
-      <div id="chat-header"><h1>Stina 2.0</h1></div>
-      <div id="webchat" role="main"></div>
-    </div>
+  <div id="chat-wrapper">
+    <div id="chat-header"><h1>Stina 2.0</h1></div>
+    <div id="webchat" role="main"></div>
+  </div>
 
-    <button id="chat-button" aria-label="Open chat"><img src="chaticon.png" alt="Chat icon"/></button>
+  <button id="chat-button">Open Chat</button>
 
-    <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
-    <script>
+  <script src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+  <script>
   (async function() {
-    // 1) Cache your DOM references once
+    // 1) Element references
     const languageSelect = document.getElementById('language-select');
     const marketSelect   = document.getElementById('market-select');
+    const webchatDiv     = document.getElementById('webchat');
     const chatButton     = document.getElementById('chat-button');
     const chatWrapper    = document.getElementById('chat-wrapper');
-    const webchatDiv     = document.getElementById('webchat');
 
-    // 2) StyleOptions + StyleSet (unchanged)
-    const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
+    // 2) StyleOptions + StyleSet
+    const styleOptions = { hideUploadButton: true };
     const styleSet     = WebChat.createStyleSet(styleOptions);
-    // … your styleSet overrides …
 
-    // 3) Build your exact token endpoint URL
+    // 3) Token endpoint URL (exact as yours)
     const tokenEndpointURL = new URL(
       'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
       'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?' +
@@ -115,37 +51,35 @@
     );
     const apiVersion = tokenEndpointURL.searchParams.get('api-version');
 
-    // 4) Reusable chat-creation function
+    // 4) Helper to (re)create the chat
     async function createChat(locale, marketCode) {
-      // a) Clear out the old UI
+      // a) Clear UI
       webchatDiv.innerHTML = '';
 
-      // b) Tear down old connection
+      // b) Tear down old DirectLine if any
       if (window.currentDirectLine) {
         window.currentDirectLine.end();
       }
 
-      // c) Fetch the regional channel settings + token
-      const [ regionalSettings, tokenResponse ] = await Promise.all([
+      // c) Fetch region-specific endpoint & token
+      const [regional, tokenResp] = await Promise.all([
         fetch(
           new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL)
-        )
-          .then(res => res.json()),
-        fetch(tokenEndpointURL)
-          .then(res => res.json())
+        ).then(r => r.json()),
+        fetch(tokenEndpointURL).then(r => r.json())
       ]);
 
-      const directLineURL = regionalSettings.channelUrlsById.directline;   // e.g. "https://…/v3/directline"
-      const token         = tokenResponse.token;
+      const directLineURL = regional.channelUrlsById.directline;  // e.g. ".../v3/directline"
+      const token         = tokenResp.token;
 
-      // d) Create a new DirectLine instance pointing at your PVA endpoint
+      // d) New DirectLine instance
       const dl = WebChat.createDirectLine({
         domain:  new URL('v3/directline', directLineURL),
         token
       });
       window.currentDirectLine = dl;
 
-      // e) On connect, start the conversation and set global variables
+      // e) On connect, start + set context
       dl.connectionStatus$.subscribe(({ value }) => {
         if (value === 2) {
           dl.postActivity({
@@ -170,13 +104,13 @@
       );
     }
 
-    // 5) Initial chat on page load
+    // 5) Initial load
     await createChat(
-      languageSelect.value || 'en-GB',
-      marketSelect.value   || 'SE'
+      languageSelect.value,
+      marketSelect.value
     );
 
-    // 6) Show/hide handlers (unchanged)
+    // 6) Show/hide logic (optional)
     chatButton.addEventListener('click', () => {
       chatWrapper.style.display = 'block';
       chatButton.style.display  = 'none';
@@ -188,16 +122,16 @@
         !chatButton.contains(e.target)
       ) {
         chatWrapper.style.display = 'none';
-        chatButton.style.display  = 'flex';
+        chatButton.style.display  = 'inline-block';
       }
     });
 
-    // 7) Re-create chat on language change
+    // 7) Language switch → fresh chat
     languageSelect.addEventListener('change', () => {
       createChat(languageSelect.value, marketSelect.value);
     });
 
-    // 8) Only update marketCode mid-session if you don’t want a full restart:
+    // 8) Market switch → just update context
     marketSelect.addEventListener('change', () => {
       if (window.currentDirectLine) {
         window.currentDirectLine.postActivity({
@@ -209,5 +143,5 @@
     });
   })();
   </script>
-  </body>
+</body>
 </html>
