@@ -179,11 +179,11 @@
 
         // Language change event
         languageSelect.addEventListener('change', () => {
-          directLine.postActivity({ type: 'event', name: 'userSettings', value: { System: { 'User.Language': languageSelect.value } } }).subscribe();
+          directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { System: { 'User.Language': languageSelect.value } } }).subscribe();
         });
         // Market change event
         marketSelect.addEventListener('change', () => {
-          directLine.postActivity({ type: 'event', name: 'userSettings', value: { marketCode: marketSelect.value }}).subscribe();
+          directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { marketCode: marketSelect.value }}).subscribe();
         });
       })();
     </script>
