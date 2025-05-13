@@ -157,6 +157,11 @@
         directLine.connectionStatus$.subscribe({ next: v => {
           if (v === 2) {
             directLine.postActivity({ type: 'event', name: 'startConversation', locale: document.documentElement.lang || 'en', localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }).subscribe();
+            directLine.postActivity({
+              type: 'event',
+              name: 'pvaSetContext',
+              value: { marketCode: marketSelect.value || 'SE'}
+            }).subscribe();
           }
         }});
 
@@ -177,11 +182,11 @@
           }
         });
 
-        // Language change event
+        // Language change event  - changed userSettings to pvaSetContext
         languageSelect.addEventListener('change', () => {
           directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { System: { 'User.Language': languageSelect.value } } }).subscribe();
         });
-        // Market change event
+        // Market change event  - changed userSettings to pvaSetContext
         marketSelect.addEventListener('change', () => {
           directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { marketCode: marketSelect.value }}).subscribe();
         });
