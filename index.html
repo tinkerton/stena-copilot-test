@@ -95,114 +95,151 @@
     <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
     <script>
       (async function() {
-        // 1) Grab your DOM elements once
+
+        // UI handlers
+        const chatButton = document.getElementById('chat-button');
+        const chatWrapper = document.getElementById('chat-wrapper');
         const languageSelect = document.getElementById('language-select');
-        const marketSelect   = document.getElementById('market-select');
-        const chatButton     = document.getElementById('chat-button');
-        const chatWrapper    = document.getElementById('chat-wrapper');
-        const webchatDiv     = document.getElementById('webchat');
-    
-        // 2) Common styleOptions / styleSet
+        const marketSelect = document.getElementById('market-select');
+
+        // Base style options
         const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
-        const styleSet     = WebChat.createStyleSet(styleOptions);
-        // …apply your bubbleFromBot, suggestedActionsContainer, suggestedAction overrides here…
-    
-        // 3) Token endpoint base URL
+        const styleSet = WebChat.createStyleSet(styleOptions);
+
+        // Bot bubble styling: auto width, max 100%, stacked vertically
+        styleSet.bubbleFromBot = {
+          background: 'rgb(238, 238, 238)',
+          margin: '7px 0 0 0',
+          width: 'auto',
+          maxWidth: '100%',
+          padding: '10px 14px',
+          borderRadius: '10px 10px 10px 0px',
+          transform: 'scale(1)',
+          animationFillMode: 'forwards',
+          transformOrigin: '0px 0px',
+          transition: 'border-radius 300ms',
+          whiteSpace: 'normal'
+        };
+
+        // Quick replies container: vertical stack
+        styleSet.suggestedActionsContainer = {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          maxWidth: '380px',
+          width: '100%'
+        };
+
+        // Quick reply button styling: no right margin to avoid overflow
+        styleSet.suggestedAction = {
+          width: '100%',
+          backgroundColor: 'transparent',
+          border: 'thin dashed rgb(212, 212, 212)',
+          color: 'black',
+          minWidth: '100px',
+          margin: '10px 0 0 0',
+          padding: '10px 14px',
+          borderRadius: '20px',
+          textAlign: 'center',
+          fontSize: '1em',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        };
+
+        // Fetch token & DirectLine URL
         const tokenEndpointURL = new URL(
-          'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/' +
-          'powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?' +
-          'api-version=2022-03-01-preview'
+          'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
         );
         const apiVersion = tokenEndpointURL.searchParams.get('api-version');
-    
-        // 4) A function to create (or re-create) the chat
-        async function initializeChat(locale, marketCode) {
-          // 4.1 Clear and unmount existing chat
-          webchatDiv.innerHTML = '';
-          if (window.currentDirectLine) {
-            window.currentDirectLine.end();       // close socket
-          }
-    
-          // 4.2 Fetch new token & directLine URL
-          const [directLineURL, { token }] = await Promise.all([
-            fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
-              .then(r => r.json())
-              .then(j => j.channelUrlsById.directline),
-            fetch(tokenEndpointURL)
-              .then(r => r.json())
-          ]);
-    
-          // 4.3 Create a fresh DirectLine instance
-          const directLine = WebChat.createDirectLine({
-            domain: new URL('v3/directline', directLineURL),
-            token
-          });
-          window.currentDirectLine = directLine;  // keep reference so we can .end()
-    
-          // 4.4 On connect: start conversation + set global context
-          directLine.connectionStatus$.subscribe(({ value }) => {
-            if (value === 2) {
-              directLine.postActivity({
-                type: 'event',
-                name: 'startConversation',
-                locale,
-                localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-              }).subscribe();
-    
-              directLine.postActivity({
-                type: 'event',
-                name: 'pvaSetContext',
-                value: { marketCode, userLocale: locale }
-              }).subscribe();
-            }
-          });
-    
-          // 4.5 Render Web Chat
-          WebChat.renderWebChat(
-            { directLine, locale, styleOptions, styleSet },
-            webchatDiv
-          );
-        }
-    
-        // 5) Initial chat creation on page load
-        await initializeChat(
-          languageSelect.value || 'en-GB',
-          marketSelect.value   || 'SE'
-        );
-    
-        // 6) UI handlers (show/hide)
-        chatButton.addEventListener('click', () => {
-          chatWrapper.style.display = 'block';
-          chatButton.style.display  = 'none';
-        });
-        document.addEventListener('click', e => {
-          if (
-            chatWrapper.style.display === 'block' &&
-            !chatWrapper.contains(e.target) &&
-            !chatButton.contains(e.target)
-          ) {
-            chatWrapper.style.display = 'none';
-            chatButton.style.display  = 'flex';
-          }
-        });
-    
-        // 7) Re-create chat on language change
-        languageSelect.addEventListener('change', () => {
-          initializeChat(languageSelect.value, marketSelect.value);
-        });
-    
-        // 8) Or if you only want to change market without restarting
-        marketSelect.addEventListener('change', () => {
-          if (window.currentDirectLine) {
-            window.currentDirectLine.postActivity({
+        const [directLineURL, token] = await Promise.all([
+          fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+            .then(r => r.json()).then(j => j.channelUrlsById.directline),
+          fetch(tokenEndpointURL).then(r => r.json()).then(j => j.token)
+        ]);
+
+        // Initialize DirectLine
+        const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
+        directLine.connectionStatus$.subscribe({ next: v => {
+          if (v === 2) {
+            directLine.postActivity({ type: 'event', name: 'startConversation', locale: languageSelect.value || 'en', localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone }).subscribe();
+            directLine.postActivity({
               type: 'event',
               name: 'pvaSetContext',
-              value: { marketCode: marketSelect.value }
+              value: { marketCode: marketSelect.value || 'SE'}
+            }).subscribe();
+          }
+        }});
+
+        // Render Web Chat
+        WebChat.renderWebChat({ directLine, locale: languageSelect.value || 'en', styleOptions, styleSet }, document.getElementById('webchat'));
+
+        
+
+        // Toggle chat visibility
+        chatButton.addEventListener('click', () => { chatWrapper.style.display = 'block'; chatButton.style.display = 'none'; });
+        document.addEventListener('click', e => {
+          if (chatWrapper.style.display === 'block' && !chatWrapper.contains(e.target) && !chatButton.contains(e.target)) {
+            chatWrapper.style.display = 'none'; chatButton.style.display = 'flex';
+          }
+        });
+
+        languageSelect.addEventListener('change', async () => {
+        const newLocale = languageSelect.value;
+
+        // 1. Tear down old chat instance
+        //    a) Clear the DIV
+        const webchatDiv = document.getElementById('webchat');
+        webchatDiv.innerHTML = '';
+
+        //    b) End the old DirectLine (optional cleanup)
+        directLine.end();  // unsubscribes, closes socket
+
+        // 2. Create a brand-new DirectLine conversation
+        //    (you may need to fetch a fresh token if tokens are 30–60m-lifespan)
+        const { token: newToken } = await fetch(tokenEndpointURL).then(r => r.json());
+        const newDirectLine = WebChat.createDirectLine({ domain: directLineURL, token: newToken });
+
+        // 3. Send your context and startConversation on new connect
+        newDirectLine.connectionStatus$.subscribe(({ value }) => {
+          if (value === 2) {
+            newDirectLine.postActivity({
+              type: 'event',
+              name: 'startConversation',
+              locale: newLocale,
+              localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }).subscribe();
+
+            newDirectLine.postActivity({
+              type: 'event',
+              name: 'pvaSetContext',
+              value: {
+                marketCode: marketSelect.value,
+                userLocale: newLocale
+              }
             }).subscribe();
           }
         });
+
+        // 4. Render the fresh chat
+        WebChat.renderWebChat(
+          {
+            directLine: newDirectLine,
+            locale: newLocale,
+            styleOptions,
+            styleSet
+          },
+          webchatDiv
+        );
+      });
+
+      
+        // Market change event  - changed userSettings to pvaSetContext
+        marketSelect.addEventListener('change', () => {
+          directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { marketCode: marketSelect.value }}).subscribe();
+        });
       })();
     </script>
-    
   </body>
 </html>
