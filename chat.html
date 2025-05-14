@@ -95,12 +95,27 @@
     <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
     <script>
       (async function() {
-
+        // Map CHAT_MARKET to language name
+        
         // LANGUAGE
         const params = new URLSearchParams(window.location.search);
         const CHAT_LANGUAGE = params.get('language') || 'en-GB';
         const CHAT_MARKET   = params.get('marketCode') || 'uk';
 
+        const marketLanguageMap = {
+          uk: 'English',
+          ie: 'Irish',
+          se: 'Swedish',
+          pl: 'Polish',
+          nl: 'Dutch'
+        };
+        // Resolve language name
+        const languageName = marketLanguageMap[CHAT_MARKET.toLowerCase()] || 'English';
+       
+        // Update the chat header H1
+        document.querySelector('#chat-header h1').textContent = `Stina 2.0 - ${languageName}`;
+
+        
          // UI handlers
         const chatButton = document.getElementById('chat-button');
         const chatWrapper = document.getElementById('chat-wrapper');
