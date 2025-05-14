@@ -1,0 +1,198 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRedirect
+  id: main
+  priority: 10
+  runOnce: true
+  actions:
+    - kind: BeginDialog
+      id: LJA0Cc
+      dialog: cre45_stinaCopilotPoc.topic.SetDevelopmentEnv.
+
+    - kind: ConditionGroup
+      id: conditionGroup_0QsUEH
+      conditions:
+        - id: conditionItem_kTwq1O
+          condition: =Global.marketCode = "se"
+          actions:
+            - kind: SetVariable
+              id: setVariable_8CJjkw
+              variable: System.User.Language
+              value:
+                kind: OptionDataValue
+                type:
+                  kind: SystemOptionSet
+                  name: Locale
+
+                value: Swedish
+
+        - id: conditionItem_9IpfDI
+          condition: =Global.marketCode = "pl"
+          actions:
+            - kind: SetVariable
+              id: setVariable_lysb9T
+              variable: System.User.Language
+              value:
+                kind: OptionDataValue
+                type:
+                  kind: SystemOptionSet
+                  name: Locale
+
+                value: Polish
+
+        - id: conditionItem_8hvddc
+          condition: =Global.marketCode = "nl"
+          actions:
+            - kind: SetVariable
+              id: setVariable_FbiaaL
+              variable: System.User.Language
+              value:
+                kind: OptionDataValue
+                type:
+                  kind: SystemOptionSet
+                  name: Locale
+
+                value: Dutch
+
+        - id: conditionItem_ZslqPP
+          condition: =Global.marketCode = "ie"
+          actions:
+            - kind: SetVariable
+              id: setVariable_Y9SRG2
+              variable: System.User.Language
+              value:
+                kind: OptionDataValue
+                type:
+                  kind: SystemOptionSet
+                  name: Locale
+
+                value: English_UK
+
+        - id: conditionItem_hHT7md
+          condition: =Global.marketCode = "uk"
+          actions:
+            - kind: SetVariable
+              id: setVariable_bBa8Lc
+              variable: System.User.Language
+              value:
+                kind: OptionDataValue
+                type:
+                  kind: SystemOptionSet
+                  name: Locale
+
+                value: English_UK
+
+      elseActions:
+        - kind: SetVariable
+          id: setVariable_fCEAgY
+          variable: System.User.Language
+          value:
+            kind: OptionDataValue
+            type:
+              kind: SystemOptionSet
+              name: Locale
+
+            value: English_UK
+
+    - kind: SetVariable
+      id: setVariable_psfIDg
+      displayName: REMOVE Route Name
+      variable: Global.routeName
+      value: null
+
+    - kind: SetVariable
+      id: setVariable_F3ttwe
+      displayName: REMOVE Departure Port
+      variable: Global.departurePort
+      value: null
+
+    - kind: SetVariable
+      id: setVariable_eiJv8j
+      displayName: REMOVE Arrival Port
+      variable: Global.arrivalPort
+      value: null
+
+    - kind: SetVariable
+      id: setVariable_GFQsf2
+      displayName: REMOVE Pets
+      variable: Global.hasPets
+      value: null
+
+    - kind: SetVariable
+      id: setVariable_vkHurn
+      displayName: REMOVE Vehicle
+      variable: Global.hasVehicle
+      value: null
+
+    - kind: SetVariable
+      id: setVariable_yO6Nyu
+      displayName: REMOVE Passenger count
+      variable: Global.passengerCount
+      value: 1
+
+    - kind: SetVariable
+      id: setVariable_FQCXmv
+      displayName: REMOVE Infants
+      variable: Global.hasInfants
+      value: null
+
+    - kind: SetVariable
+      id: setVariable_ssfsZN
+      displayName: Booking number
+      variable: Global.bookingNumber
+      value: null
+
+    - kind: SetVariable
+      id: setVariable_NmjLcB
+      displayName: Email
+      variable: Global.email
+      value: null
+
+    - kind: SetVariable
+      id: setVariable_52bA6X
+      displayName: Market baseURL
+      variable: Global.baseURL
+      value: |-
+        =Switch(
+            Lower(Global.marketCode),
+            "se", "https://www.stenaline.se",
+            "uk", "https://www.stenaline.co.uk",
+            "ie", "https://www.stenaline.ie",
+            "pl", "https://www.stenaline.pl",
+            "nl", "https://www.stenaline.nl",
+            "https://www.stenaline.com"
+        )
+
+    - kind: SetVariable
+      id: setVariable_G2eySD
+      displayName: REMOVE defaultAnswerPrompt
+      variable: Global.defaultAnswerPrompt
+      value: |-
+        =" You are a helpful assistant for Stena Line.
+        
+        Use only the knowledge available from " & Switch( Lower(Global.marketCode), "se", "Sweden’s", "nl", "Netherlands’", "pl", "Poland’s", "ie", "UK's", "uk", "UK’s", "your region’s" ) & " official Stena Line customer support site to answer the user's question.
+        
+        Do not use general world knowledge or information from other countries.
+        
+        Answer based primarily on the user's message. Use the provided user context only to guide small variations in your response, such as whether the user is travelling with a vehicle or has pets.
+        
+        Ignore any context that clearly doesn’t apply to the user's question.
+        
+        If no relevant answer is available, respond in a friendly and conversational tone. Let the user know you're not completely sure, but do not suggest escalation or contacting support. Instead, ask a follow-up question or invite the user to rephrase."
+
+    - kind: SetVariable
+      id: setVariable_oQodcz
+      displayName: "REMOVE: Set variable value"
+      variable: Global.contextText
+      value: |-
+        =Concatenate(
+            If(!IsBlank(Global.departurePort), "Departure port: " & Global.departurePort & Char(10), ""),
+            If(!IsBlank(Global.arrivalPort), "Arrival port: " & Global.arrivalPort & Char(10), ""),
+            If(!IsBlank(Global.hasPets), "Travelling with pets: " & Global.hasPets & Char(10), ""),
+            If(!IsBlank(Global.hasVehicle), "Travelling with vehicle: " & Global.hasVehicle & Char(10), ""),
+            If(!IsBlank(Global.passengerCount), "Number of passengers: " & Global.passengerCount & Char(10), ""),
+            If(!IsBlank(Global.hasInfants), "Travelling with infants: " & Global.hasInfants & Char(10), "")
+        )
+
+inputType: {}
+outputType: {}
