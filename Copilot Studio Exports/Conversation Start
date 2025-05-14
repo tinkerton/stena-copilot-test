@@ -1,0 +1,42 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnConversationStart
+  id: main
+  actions:
+    - kind: SetVariable
+      id: setVariable_Q30Igj
+      displayName: Set Development Mode
+      variable: Global.DEV
+      value: false
+
+    - kind: BeginDialog
+      id: iL1chs
+      dialog: cre45_stinaCopilotPoc.topic.SessionInit
+
+    - kind: SendActivity
+      id: sendActivity_KaARgc
+      activity:
+        text:
+          - |-
+            Welcome aboard! 🚢🙂
+            
+            I'm Stina and I'm here to help you with any questions you might have.
+        quickReplies:
+          - kind: SendHiddenMessageBack
+            title: I want to amend my booking
+            text: I want to amend my booking
+
+          - kind: SendHiddenMessageBack
+            title: Do I need a passport to travel?
+            text: Do I need a passport
+
+          - kind: SendHiddenMessageBack
+            title: Is my ferry on time?
+            text: Is my ferry on time?
+
+          - kind: SendHiddenMessageBack
+            title: "DEV: setLanguage"
+            text: Set language
+
+    - kind: EndDialog
+      id: 7uRCJz
