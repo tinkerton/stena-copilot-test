@@ -1,0 +1,14 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  priority: 1000
+  intent: {}
+  actions:
+    - kind: SetVariable
+      id: setVariable_MCOkeZ
+      variable: init:Global.marketCode
+      value: uk
+
+inputType: {}
+outputType: {}
