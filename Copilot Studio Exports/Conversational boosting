@@ -1,0 +1,146 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnUnknownIntent
+  id: main
+  priority: -1
+  actions:
+    - kind: SendActivity
+      id: sendActivity_xUgzga
+      activity: Conversational boosting
+
+    - kind: ConditionGroup
+      id: conditionGroup_hw8nEx
+      conditions:
+        - id: conditionItem_1gEygL
+          condition: =Global.marketCode = "se"
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: P07gCE
+              variable: Topic.Answer
+              userInput: =System.Activity.Text
+              moderationLevel: Medium
+              additionalInstructions:
+              fileSearchDataSource:
+                searchFilesMode:
+                  kind: DoNotSearchFiles
+
+              knowledgeSources:
+                kind: SearchSpecificKnowledgeSources
+                knowledgeSources:
+                  - cre45_stinaCopilotPoc.topic.httpswwwstenalinesekundtjanst_lpsgCPaks10nVb7TQAeA7
+
+              publicDataSource: {}
+              sharePointSearchDataSource: {}
+
+        - id: conditionItem_ts2edR
+          condition: =Global.marketCode = "pl"
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: 8GWU6L
+              variable: Topic.Answer
+              userInput: =System.Activity.Text
+              moderationLevel: Medium
+              additionalInstructions:
+              fileSearchDataSource:
+                searchFilesMode:
+                  kind: DoNotSearchFiles
+
+              knowledgeSources:
+                kind: SearchSpecificKnowledgeSources
+                knowledgeSources:
+                  - cre45_stinaCopilotPoc.topic.httpswwwstenalineplobslugaklienta_CYKTJMTIiJQ6ZSYH8mcLi
+
+              publicDataSource: {}
+              sharePointSearchDataSource: {}
+
+        - id: conditionItem_MUP20h
+          condition: =Global.marketCode = "nl"
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: 0hzl0E
+              variable: Topic.Answer
+              userInput: =System.Activity.Text
+              moderationLevel: Medium
+              additionalInstructions:
+              fileSearchDataSource:
+                searchFilesMode:
+                  kind: DoNotSearchFiles
+
+              knowledgeSources:
+                kind: SearchSpecificKnowledgeSources
+                knowledgeSources:
+                  - cre45_stinaCopilotPoc.topic.httpswwwstenalinenlklantenservice_4RYHZcE0Bxp872uQab1Yo
+
+              publicDataSource: {}
+              sharePointSearchDataSource: {}
+
+        - id: conditionItem_HZlcry
+          condition: =Global.marketCode = "ie"
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: wI5cTu
+              variable: Topic.Answer
+              userInput: =System.Activity.Text
+              moderationLevel: Medium
+              additionalInstructions:
+              fileSearchDataSource:
+                searchFilesMode:
+                  kind: DoNotSearchFiles
+
+              knowledgeSources:
+                kind: SearchSpecificKnowledgeSources
+                knowledgeSources:
+                  - cre45_stinaCopilotPoc.topic.StenaLineIE_3wyRrLBKAZ2GXV3LyJwIL
+
+              publicDataSource: {}
+              sharePointSearchDataSource: {}
+
+        - id: conditionItem_AX0IfW
+          condition: =Global.marketCode = "uk"
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: cdyQjn
+              variable: Topic.Answer
+              userInput: =System.Activity.Text
+              moderationLevel: Medium
+              additionalInstructions:
+              fileSearchDataSource:
+                searchFilesMode:
+                  kind: DoNotSearchFiles
+
+              knowledgeSources:
+                kind: SearchSpecificKnowledgeSources
+                knowledgeSources:
+                  - cre45_stinaCopilotPoc.topic.httpswwwstenalinecoukpets_yyImpns5J7M9HjBAlk9Ah
+
+              publicDataSource: {}
+              sharePointSearchDataSource: {}
+
+      elseActions:
+        - kind: SearchAndSummarizeContent
+          id: HLVDmX
+          variable: Topic.Answer
+          userInput: =System.Activity.Text
+          moderationLevel: Medium
+          additionalInstructions:
+          fileSearchDataSource:
+            searchFilesMode:
+              kind: DoNotSearchFiles
+
+          knowledgeSources:
+            kind: SearchSpecificKnowledgeSources
+            knowledgeSources:
+              - cre45_stinaCopilotPoc.topic.httpswwwstenalinetravelcom_vKPgVGDCABzR9g_YvQogh
+
+          publicDataSource: {}
+          sharePointSearchDataSource: {}
+
+    - kind: ConditionGroup
+      id: has-answer-conditions
+      conditions:
+        - id: has-answer
+          condition: =!IsBlank(Topic.Answer)
+          actions:
+            - kind: EndDialog
+              id: end-topic
+              clearTopicQueue: true
