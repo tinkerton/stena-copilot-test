@@ -164,14 +164,17 @@
         ]);
 
         // Initialize DirectLine
+       
         const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
-        directLine.connectionStatus$.subscribe({ next: v => {
+         /*
+           directLine.connectionStatus$.subscribe({ next: v => {
           if (v === 2) {
             directLine.postActivity({
               type: 'event',
               name: 'pvaSetContext',
               value: {marketCode: CHAT_MARKET}
             }).subscribe();
+        
             directLine.postActivity({ 
               type: 'event', 
               name: 'startConversation', 
@@ -181,7 +184,45 @@
             
           }
         }});
+        */
 
+        // Helper to turn postActivity into a promise so we can await it
+function postActivityAsync(directLine, activity) {
+  return new Promise((resolve, reject) => {
+    directLine.postActivity(activity).subscribe({
+      next: id   => resolve(id),
+      error: err => reject(err)
+    });
+  });
+}
+
+// Wait for the bot to connect, then set context *then* startConversation
+directLine.connectionStatus$.subscribe(status => {
+  if (status !== 2) return;           // only run when “Online”
+
+  (async () => {
+    try {
+      // 1️⃣ Send marketCode and wait for it to succeed
+      await postActivityAsync(directLine, {
+        type: 'event',
+        name: 'pvaSetContext',
+        value: { marketCode: CHAT_MARKET }
+      });
+      console.log('✅ pvaSetContext sent');
+
+      // 2️⃣ Once that’s done, fire off startConversation
+      await postActivityAsync(directLine, {
+        type: 'event',
+        name: 'startConversation',
+        locale: CHAT_LANGUAGE,
+        localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
+      console.log('🚀 startConversation sent');
+    } catch (err) {
+      console.error('Chat initialization failed:', err);
+    }
+  })();
+});
         // Render Web Chat
         WebChat.renderWebChat({ directLine, locale: CHAT_LANGUAGE, styleOptions, styleSet }, document.getElementById('webchat'));
 
