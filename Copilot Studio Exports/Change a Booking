@@ -1,0 +1,257 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    includeInOnSelectIntent: true
+    triggerQueries:
+      - can I change my booking
+      - can I change my booking
+      - can I amend my booking
+      - how do I modify my booking
+      - how do I change my reservation
+      - need to update my booking
+      - how to edit my booking
+      - change passenger details
+      - change license plate
+      - change cabin or car
+      - something wrong with my booking
+      - how do I fix my booking
+      - booking is incorrect
+      - cannot amend booking online
+      - change travel time or date
+      - can I rebook
+
+  actions:
+    - kind: AdaptiveCardPrompt
+      id: EDEb3p
+      repeatCount: 0
+      card: |-
+        {
+          "type": "AdaptiveCard",
+          "$schema": "https://adaptivecards.io/schemas/adaptive-card.json",
+          "version": "1.5",
+          "body": [
+            {
+              "type": "Container",
+              "items": [
+                {
+                  "type": "TextBlock",
+                  "text": "Amend my booking ",
+                  "wrap": true,
+                  "style": "heading",
+                  "size": "Medium"
+                },
+                {
+                  "type": "TextBlock",
+                  "text": "Please enter your booking number and the email you used when booking, please. ",
+                  "wrap": true
+                },
+                {
+                  "id": "bookingno1qwr",
+                  "type": "Input.Text",
+                  "label": "Booking number ",
+                  "placeholder": "Enter booking no."
+                },
+                {
+                  "id": "bookingemailwef34",
+                  "type": "Input.Text",
+                  "label": "Email ",
+                  "placeholder": "Enter booking email"
+                }
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "type": "Action.Submit",
+              "title": "Log in",
+              "style": "positive"
+            }
+          ]
+        }
+      output:
+        binding:
+          actionSubmitId: Topic.actionSubmitId
+          bookingemailwef34: Topic.booking
+          bookingno1qwr: Topic.bookingno1qwr
+
+      outputType:
+        properties:
+          actionSubmitId: String
+          bookingemailwef34: String
+          bookingno1qwr: String
+
+    - kind: GotoAction
+      id: nHmmmk
+      actionId: setVariable_EXO6Go
+
+    - kind: Question
+      id: question_wwDuJH
+      interruptionPolicy:
+        allowInterruption: true
+        interruptionTopicListFilter:
+          kind: IncludeSelectedTopics
+
+      repeatCount: 0
+      variable: Topic.common_var_1
+      prompt:
+        text:
+          - |-
+            No problem  — you can manage most booking changes [online](https://booking.stenaline.co.uk/login).
+            
+            If you have your **booking number** I'll take you there right away!
+        quickReplies:
+          - kind: MessageBack
+            title: "DEV: 92751130"
+            text: 92751130
+
+      entity: StringPrebuiltEntity
+
+    - kind: ConditionGroup
+      id: conditionGroup_6nOBGb
+      conditions:
+        - id: conditionItem_9LnQEG
+          condition: =If(Len(Topic.common_var_1) = 8 && IsNumeric(Topic.common_var_1), true, false)
+          displayName: Check if Booking number is entered
+          actions:
+            - kind: SetVariable
+              id: setVariable_LwZuk0
+              variable: Global.bookingNumber
+              value: =Topic.common_var_1
+
+      elseActions:
+        - kind: BeginDialog
+          id: WCcU70
+          dialog: cre45_stinaCopilotPoc.topic.Search
+
+        - kind: EndDialog
+          id: aBzkcb
+
+    - kind: Question
+      id: question_fMzYhE
+      interruptionPolicy:
+        allowInterruption: true
+        interruptionTopicListFilter:
+          kind: IncludeSelectedTopics
+          allowedInterruptTopics:
+            - cre45_stinaCopilotPoc.topic.ChangeaBooking
+            - cre45_stinaCopilotPoc.topic.Escalate
+            - cre45_stinaCopilotPoc.topic.Exitconversation
+            - cre45_stinaCopilotPoc.topic.GeneralBookingQuestions
+            - cre45_stinaCopilotPoc.topic.Goodbye
+            - cre45_stinaCopilotPoc.topic.Greeting
+            - cre45_stinaCopilotPoc.topic.StartOver
+            - cre45_stinaCopilotPoc.topic.ThankYou
+
+      unrecognizedPrompt:
+        text:
+          - That didn’t seem to be a valid email address. Could you double-check it and try again?
+          - Hmm, that doesn’t look quite right. Could you check the email and try again?
+          - I couldn’t recognize that as a valid email. Mind giving it another look and trying again?
+
+      repeatCount: 1
+      alwaysPrompt: true
+      variable: init:Topic.bookingEmail
+      prompt:
+        text:
+          - Got it. What email address did you use for the booking?
+          - "> Thank you. What email address did you use for the booking?"
+        quickReplies:
+          - kind: SendHiddenMessageBack
+            title: Use DEV email
+            text: jonas@tinkerton.se
+
+      defaultValue: =Blank()
+      entity: EmailPrebuiltEntity
+
+    - kind: ConditionGroup
+      id: conditionGroup_h3cDTs
+      conditions:
+        - id: conditionItem_vLUYnB
+          condition: =!IsBlank(Topic.bookingEmail)
+          displayName: Email exists
+
+      elseActions:
+        - kind: SendActivity
+          id: sendActivity_fOk0yl
+          activity:
+            text:
+              - |-
+                It seems like you're having trouble with your booking information — that’s okay!
+                You can still try to manage your booking here:
+                
+                [My pages](https://booking.stenaline.co.uk/login)
+                
+                Or ask me something else if you’d like.
+            quickReplies:
+              - kind: SendHiddenMessageBack
+                title: Let's try again
+                text: I want to amend my booking
+
+        - kind: EndDialog
+          id: MH3oIv
+
+    - kind: SetVariable
+      id: setVariable_EXO6Go
+      variable: Global.bookingNumber
+      value: =Topic.bookingno1qwr
+
+    - kind: SetVariable
+      id: setVariable_4oaXzZ
+      variable: Topic.bookingEmail
+      value: =Topic.booking
+
+    - kind: ConditionGroup
+      id: conditionGroup_K81QRE
+      conditions:
+        - id: conditionItem_vkMnx9
+          condition: =!IsBlank(Global.bookingNumber) && !IsBlank(Topic.bookingEmail)
+
+      elseActions:
+        - kind: SendActivity
+          id: sendActivity_6YMnlm
+          activity:
+            text:
+              - |-
+                You need to enter both a booking number (8 digits) and the email address that you used when you booked.
+                
+                Try again?
+            quickReplies:
+              - kind: SendHiddenMessageBack
+                title: Yes
+                text: Amend my booking
+
+        - kind: EndDialog
+          id: icWuU8
+
+    - kind: InvokeFlowAction
+      id: invokeFlowAction_9hblsu
+      displayName: Encrypt Email by API
+      input:
+        binding:
+          bookingEmail: =Topic.bookingEmail
+          bookingNumber: =Int(Global.bookingNumber)
+          text: https://bookingmain.stenaline.se/book/Confirmation
+
+      output:
+        binding:
+          bookinglink: Topic.bookingLink
+
+      flowId: abb16920-0a16-f011-998a-6045bda1abcd
+
+    - kind: SendActivity
+      id: sendActivity_UqNGUP
+      displayName: Output a booking link
+      activity: |-
+        Thanks! You can now access your booking directly:
+        
+        [Access your booking]({Topic.bookingLink})
+
+    - kind: EndDialog
+      id: 2LsQ4G
+      displayName: End of booking topic
+      clearTopicQueue: true
+
+inputType: {}
+outputType: {}
