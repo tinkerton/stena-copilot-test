@@ -1,0 +1,279 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>(ENG) Stena Line Stina 2.0 Web Chat</title>
+    <style>
+      /* Page background */
+      html, body { height: 100%; margin: 0; }
+      .background { background: url('stenaline-website.png') no-repeat top center; background-size: 100% auto; width: 100%; aspect-ratio: 3220 / 11844; }
+
+      /* Global settings dropdowns */
+      #global-settings {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+        z-index: 1000;
+      }
+      #global-settings select { height: 30px; font-size: 14px; }
+
+      /* Chat wrapper */
+      #chat-wrapper {
+        display: none;
+        position: fixed;
+        bottom: 50px;
+        right: 50px;
+        width: 350px;
+        height: 500px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 500;
+      }
+      /* Chat header */
+      #chat-header {
+        background-color: #004a93;
+        color: white;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding: 0 10px;
+      }
+      #chat-header h1 { margin: 0; font-size: 16px; font-family: Segoe UI; }
+
+      /* Web Chat container, hide horizontal overflow */
+      #webchat { height: calc(100% - 50px); overflow-x: hidden; }
+
+      /* Chat toggle button */
+      #chat-button {
+        position: fixed;
+        bottom: 50px;
+        right: 50px;
+        width: 50px;
+        height: 50px;
+        background-color: #004a93;
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 1000;
+      }
+      #chat-button img { width: 24px; height: 24px; }
+    </style>
+  </head>
+  <body class="background">
+    <!--<div id="global-settings">
+      <select id="language-select" title="Select language">
+        <option value="en-GB">English</option>
+        <option value="sv-SE">Svenska</option>
+        <option value="nl-NL">Nederlands</option>
+        <option value="pl-PL">Polski</option>
+    </select>
+      <select id="market-select" title="Select market">
+        <option value="uk">UK</option>
+        <option value="ie">IE</option>
+        <option value="se">SE</option>
+        <option value="nl">NL</option>
+        <option value="pl">PL</option>
+      </select>
+    </div>-->
+
+    <div id="chat-wrapper">
+      <div id="chat-header"><h1>Stina 2.0 - English</h1></div>
+      <div id="webchat" role="main"></div>
+    </div>
+
+    <button id="chat-button" aria-label="Open chat"><img src="chaticon.png" alt="Chat icon"/></button>
+
+    <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+    <script>
+      (async function() {
+
+        // LANGUAGE
+        const params = new URLSearchParams(window.location.search);
+        const CHAT_LANGUAGE = params.get('language') || 'en-GB';
+        const CHAT_MARKET   = params.get('marketCode') || 'uk';
+
+         // UI handlers
+        const chatButton = document.getElementById('chat-button');
+        const chatWrapper = document.getElementById('chat-wrapper');
+       // const languageSelect = document.getElementById('language-select');
+       // const marketSelect = document.getElementById('market-select');
+
+        // Base style options
+        const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
+        const styleSet = WebChat.createStyleSet(styleOptions);
+
+        // Bot bubble styling: auto width, max 100%, stacked vertically
+        styleSet.bubbleFromBot = {
+          background: 'rgb(238, 238, 238)',
+          margin: '7px 0 0 0',
+          width: 'auto',
+          maxWidth: '100%',
+          padding: '10px 14px',
+          borderRadius: '10px 10px 10px 0px',
+          transform: 'scale(1)',
+          animationFillMode: 'forwards',
+          transformOrigin: '0px 0px',
+          transition: 'border-radius 300ms',
+          whiteSpace: 'normal'
+        };
+
+        // Quick replies container: vertical stack
+        styleSet.suggestedActionsContainer = {
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          maxWidth: '380px',
+          width: '100%'
+        };
+
+        // Quick reply button styling: no right margin to avoid overflow
+        styleSet.suggestedAction = {
+          width: '100%',
+          backgroundColor: 'transparent',
+          border: 'thin dashed rgb(212, 212, 212)',
+          color: 'black',
+          minWidth: '100px',
+          margin: '10px 0 0 0',
+          padding: '10px 14px',
+          borderRadius: '20px',
+          textAlign: 'center',
+          fontSize: '1em',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        };
+
+        // Fetch token & DirectLine URL
+        const tokenEndpointURL = new URL(
+          'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/cre45_stinaCopilotPoc/directline/token?api-version=2022-03-01-preview'
+        );
+        const apiVersion = tokenEndpointURL.searchParams.get('api-version');
+        const [directLineURL, token] = await Promise.all([
+          fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+            .then(r => r.json()).then(j => j.channelUrlsById.directline),
+          fetch(tokenEndpointURL).then(r => r.json()).then(j => j.token)
+        ]);
+
+        // Initialize DirectLine
+       
+        const directLine = WebChat.createDirectLine({ domain: new URL('v3/directline', directLineURL), token });
+         /*
+           directLine.connectionStatus$.subscribe({ next: v => {
+          if (v === 2) {
+            directLine.postActivity({
+              type: 'event',
+              name: 'pvaSetContext',
+              value: {marketCode: CHAT_MARKET}
+            }).subscribe();
+        
+            directLine.postActivity({ 
+              type: 'event', 
+              name: 'startConversation', 
+              locale: CHAT_LANGUAGE, 
+              localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone 
+            }).subscribe();
+            
+          }
+        }});
+        */
+
+        // Helper to turn postActivity into a promise so we can await it
+function postActivityAsync(directLine, activity) {
+  return new Promise((resolve, reject) => {
+    directLine.postActivity(activity).subscribe({
+      next: id   => resolve(id),
+      error: err => reject(err)
+    });
+  });
+}
+
+// Wait for the bot to connect, then set context *then* startConversation
+directLine.connectionStatus$.subscribe(status => {
+  if (status !== 2) return;           // only run when “Online”
+
+  (async () => {
+    try {
+      // 1️⃣ Send marketCode and wait for it to succeed
+      await postActivityAsync(directLine, {
+        type: 'event',
+        name: 'pvaSetContext',
+        value: { marketCode: CHAT_MARKET }
+      });
+      console.log('✅ pvaSetContext sent');
+
+      // 2️⃣ Once that’s done, fire off startConversation
+      await postActivityAsync(directLine, {
+        type: 'event',
+        name: 'startConversation',
+        locale: CHAT_LANGUAGE,
+        localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      });
+      console.log('🚀 startConversation sent');
+    } catch (err) {
+      console.error('Chat initialization failed:', err);
+    }
+  })();
+});
+        // Render Web Chat
+        WebChat.renderWebChat({ directLine, locale: CHAT_LANGUAGE, styleOptions, styleSet }, document.getElementById('webchat'));
+
+        
+
+        // Toggle chat visibility
+        chatButton.addEventListener('click', () => { chatWrapper.style.display = 'block'; chatButton.style.display = 'none'; });
+        document.addEventListener('click', e => {
+          if (chatWrapper.style.display === 'block' && !chatWrapper.contains(e.target) && !chatButton.contains(e.target)) {
+            chatWrapper.style.display = 'none'; chatButton.style.display = 'flex';
+          }
+        });
+
+        /*
+        // Language change event  - changed userSettings to pvaSetContext
+        languageSelect.addEventListener('change', () => {
+          const newLocale = languageSelect.value; // e.g. "sv-SE"
+          console.log("languageSelect: " +  languageSelect.value);
+          // 1️⃣ Tell Web Chat to switch its UI texts
+          WebChat.renderWebChat(
+            {
+              directLine,
+              locale: newLocale,            // ← sets Web Chat button/text language
+              styleOptions,
+              styleSet
+            },
+            document.getElementById('webchat')
+          );
+
+          directLine
+            .postActivity({
+              type: 'event',
+              name: 'pvaSetContext',
+              
+              value: {  System: {'User.Language': newLocale }, userLocale: newLocale, marketCode: marketSelect.value }
+            })  // <-- close postActivity argument here
+            .subscribe();
+        });
+        */
+       
+       /*
+        // Market change event  - changed userSettings to pvaSetContext
+        marketSelect.addEventListener('change', () => {
+          console.log("marketSelect: " +  marketSelect.value);
+          directLine.postActivity({ type: 'event', name: 'pvaSetContext', value: { marketCode: marketSelect.value }}).subscribe();
+        });
+        */
+      })();
+
+        
+    </script>
+  </body>
+</html>
