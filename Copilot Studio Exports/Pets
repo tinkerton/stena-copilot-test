@@ -1,0 +1,220 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: main
+  intent:
+    triggerQueries:
+      - can i bring my dog
+      - can i bring my cat
+      - can i take my rabbit on the ferry
+      - are pets allowed in cabins
+      - can my dog stay in the car
+      - how to book a pet-friendly cabin
+      - are dogs allowed on the ferry
+      - pet lounge availability
+      - pet documentation requirements
+      - do pets need a passport
+      - can i travel as a foot passenger with a dog
+      - can i add pet details to my booking
+      - kennel availability on board
+      - can pets stay in the vehicle
+      - traveling with multiple pets
+      - assistance dog travel rules
+      - can i feed my pet during crossing
+      - rules for pet transport to ireland
+      - can I bring a pet
+      - is there a charge for pet in car
+
+  actions:
+    - kind: Question
+      id: question_UGXFvU
+      interruptionPolicy:
+        allowInterruption: true
+
+      repeatCount: 0
+      variable: Global.route
+      prompt: Do you have a specific route in mind?
+      entity:
+        kind: ClosedListEntityReference
+        sensitivityLevel: None
+        entityId: cre45_stinaCopilotPoc.entity.Route
+        selectedItems:
+          - eISxuT
+          - aLg5pd
+          - TbFY3e
+
+    - kind: SetVariable
+      id: setVariable_DB7b6S
+      variable: Topic.userInputText
+      value: =System.Activity.Text
+
+    - kind: SetVariable
+      id: setVariable_wV3kB3
+      variable: Topic.currentRoute
+      value: =Global.route
+
+    - kind: ConditionGroup
+      id: conditionGroup_iclrjt
+      conditions:
+        - id: conditionItem_5jf9JY
+          condition: =IsBlank(Topic.currentRoute)
+          actions:
+            - kind: Question
+              id: question_b5wOMs
+              interruptionPolicy:
+                allowInterruption: true
+
+              variable: init:Topic.correctRouteChosen
+              prompt:
+                text:
+                  - You seem to have a pet question on {Global.route} route.
+                quickReplies:
+                  - kind: SendHiddenMessageBack
+                    title: Yes
+                    text: Yes
+
+                  - kind: SendHiddenMessageBack
+                    title: Change route
+                    text: Change route
+
+              entity: StringPrebuiltEntity
+
+            - kind: ConditionGroup
+              id: LfJLvp
+              conditions:
+                - id: 4E3GLZ
+                  condition: =Topic.correctRouteChosen = "Yes"
+
+              elseActions:
+                - kind: Question
+                  id: VxqggM
+                  interruptionPolicy:
+                    allowInterruption: true
+
+                  unrecognizedPrompt: |-
+                    Try to write your route like this:
+                    [Belfast to Liverpool](Belfast to Liverpool)
+                    [Gothenburg - Kiel](Gothenburg to Kiel)
+                  repeatCount: 1
+                  skipQuestionMode: AlwaysAsk
+                  variable: Global.route
+                  prompt: Ok, so on what route are you travelling?
+                  defaultValue: =Blank()
+                  entity:
+                    kind: ClosedListEntityReference
+                    sensitivityLevel: None
+                    entityId: cre45_stinaCopilotPoc.entity.Route
+
+      elseActions:
+        - kind: SendActivity
+          id: WLNusW
+          activity: No route mentioned.
+
+        - kind: GotoAction
+          id: Sq6CSp
+          actionId: VxqggM
+
+    - kind: ConditionGroup
+      id: conditionGroup_4pM7w0
+      conditions:
+        - id: conditionItem_riG2LC
+          condition: =Global.marketCode = "nl"
+          displayName: Market = NL
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: LpOX15
+              displayName: Generative answer NL
+              autoSend: false
+              variable: Topic.Answer
+              userInput: =Topic.userInputText
+              additionalInstructions: "The user asked: {Topic.userInputText}. Find answer focused on information about pets, animals onboard, and related rules. Answer only with information related to the  route {Global.route}."
+              fileSearchDataSource:
+                searchFilesMode:
+                  kind: DoNotSearchFiles
+
+              knowledgeSources:
+                kind: SearchSpecificKnowledgeSources
+                knowledgeSources:
+                  - cre45_stinaCopilotPoc.topic.httpswwwstenalinenlklantenservice_4RYHZcE0Bxp872uQab1Yo
+
+        - id: conditionItem_uEb1YO
+          condition: =Global.marketCode = "se"
+          displayName: Market = SE
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: y0W03h
+              displayName: Generative answer SE
+              autoSend: false
+              variable: Topic.Answer
+              userInput: =Topic.userInputText
+              additionalInstructions: "The user asked: {Topic.userInputText}. Find answer focused on information about pets, animals onboard, and related rules. Answer only with information related to the  route {Global.route}."
+              fileSearchDataSource:
+                searchFilesMode:
+                  kind: DoNotSearchFiles
+
+              knowledgeSources:
+                kind: SearchSpecificKnowledgeSources
+                knowledgeSources:
+                  - cre45_stinaCopilotPoc.topic.httpswwwstenalinesekundtjanst_lpsgCPaks10nVb7TQAeA7
+
+        - id: conditionItem_SCUdw5
+          condition: =Global.marketCode = "pl"
+          displayName: Market = PL
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: InKDv6
+              displayName: Generative answer PL
+              autoSend: false
+              variable: Topic.Answer
+              userInput: =Topic.userInputText
+              additionalInstructions: "The user asked: {Topic.userInputText}. Find answer focused on information about pets, animals onboard, and related rules. Answer only with information related to the  route {Global.route}."
+              fileSearchDataSource:
+                searchFilesMode:
+                  kind: DoNotSearchFiles
+
+              knowledgeSources:
+                kind: SearchSpecificKnowledgeSources
+                knowledgeSources:
+                  - cre45_stinaCopilotPoc.topic.httpswwwstenalineplobslugaklienta_CYKTJMTIiJQ6ZSYH8mcLi
+
+      elseActions:
+        - kind: SearchAndSummarizeContent
+          id: mWahJM
+          displayName: Generative answer English + IE + fallback
+          autoSend: false
+          variable: Topic.Answer
+          userInput: =Topic.userInputText
+          moderationLevel: High
+          additionalInstructions: "The user asked: {Topic.userInputText}. Find answer focused on information about pets, animals onboard, and related rules. Answer only with information related to the  route {Global.route}."
+          fileSearchDataSource:
+            searchFilesMode:
+              kind: DoNotSearchFiles
+
+          knowledgeSources:
+            kind: SearchSpecificKnowledgeSources
+            knowledgeSources:
+              - cre45_stinaCopilotPoc.topic.StenaLineIE_3wyRrLBKAZ2GXV3LyJwIL
+              - cre45_stinaCopilotPoc.topic.httpswwwstenalinecoukpets_yyImpns5J7M9HjBAlk9Ah
+
+    - kind: ConditionGroup
+      id: has-answer-conditions
+      conditions:
+        - id: has-answer
+          condition: =!IsBlank(Topic.Answer)
+          actions:
+            - kind: SendActivity
+              id: sendActivity_fJKcZm
+              displayName: Clean answer
+              activity: |-
+                {If(
+                  Find("[", Topic.Answer) > 0,
+                  Left(Topic.Answer, Find("[", Topic.Answer) - 1),
+                  Topic.Answer
+                )}
+
+            - kind: EndDialog
+              id: end-topic
+              clearTopicQueue: true
+
+inputType: {}
+outputType: {}
