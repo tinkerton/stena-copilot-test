@@ -110,8 +110,8 @@
        const styleOptions = {
     // ===== Brand & Accents =====
     accent: "#004A93",
-    subtleColor: "#333333FF",
-    backgroundColor: "#FFFFFFFF",
+    subtleColor: "#333",
+    backgroundColor: "#FFF",
     
 
     // ===== Typography =====
@@ -121,24 +121,24 @@
     messageActivityWordBreak: "break-word",
 
     // ===== Layout & Padding =====
-    paddingRegular: 20,
-    paddingWide: 20,
+    paddingRegular: 10,
+    paddingWide: 10,
     autoScrollSnapOnPage: true,
     autoScrollSnapOnPageOffset: 0,
 
     // ===== Avatars =====
-    avatarSize: 30,
+    avatarSize: 20,
     avatarBorderRadius: "0%", // e.g. "50%" for round
     showAvatarInGroup: "status",
 
     // Bot avatar
-    botAvatarBackgroundColor: "#FFFFFFFF",
+    botAvatarBackgroundColor: "#FFF",
     botAvatarImage:
       "https://lobster-static-upload-production.s3.eu-west-1.amazonaws.com/avatars%0A%0A/5db9430ac789d0004f198f9e/f1c24112-21ee-438f-810b-cb84bcbb9a16.png",
     botAvatarInitials: "",
 
     // User avatar
-    userAvatarBackgroundColor: "#FFFFFFFF",
+    userAvatarBackgroundColor: "#FFF",
     userAvatarImage: "",
     userAvatarInitials: "",
 
@@ -157,9 +157,9 @@
     bubbleImageMaxHeight: 240,
 
     // Bubble visuals, bot side
-    bubbleBackground: "#EEEEEEFF",
-    bubbleTextColor: "#333333FF",
-    bubbleBorderColor: "#FFFFFFFF",
+    bubbleBackground: "#ebebeb",
+    bubbleTextColor: "#333",
+    bubbleBorderColor: "#FFF",
     bubbleBorderStyle: "solid",
     bubbleBorderWidth: 1,
     bubbleBorderRadius: 11,
@@ -167,8 +167,8 @@
 
     // Bubble visuals, user side
     bubbleFromUserBackground: "#004A93FF",
-    bubbleFromUserTextColor: "#FFFFFFFF",
-    bubbleFromUserBorderColor: "#FFFFFFFF",
+    bubbleFromUserTextColor: "#FFF",
+    bubbleFromUserBorderColor: "#FFF",
     bubbleFromUserBorderStyle: "solid",
     bubbleFromUserBorderWidth: 1,
     bubbleFromUserBorderRadius: 11,
@@ -177,8 +177,8 @@
 
     // ===== Send Box =====
     sendBoxHeight: 60,
-    sendBoxBackground: "#FFFFFFFF",
-    sendBoxTextColor: "#333333FF",
+    sendBoxBackground: "#FFF",
+    sendBoxTextColor: "#333",
     sendBoxPlaceholderColor: "#191919",
     sendBoxBorderTop: "solid 1px ",
 
@@ -190,12 +190,12 @@
 
     // ===== Suggested Actions =====
     suggestedActionLayout: "flow",
-    suggestedActionBackgroundColor: "#FFFFFFFF",
+    suggestedActionBackgroundColor: "#FFF",
     suggestedActionBackgroundColorOnHover: "#EEEEEE",
-    suggestedActionBorderColor: "#E6E6E6FF",
+    suggestedActionBorderColor: "#004a93",
     suggestedActionBorderWidth: 1,
-    suggestedActionBorderRadius: 0,
-    suggestedActionTextColor: "#333333FF",
+    suggestedActionBorderRadius: 50,
+    suggestedActionTextColor: "#004a93",
 
     // ===== Typing & Spinner =====
     typingAnimationBackgroundImage:
@@ -247,7 +247,7 @@ directLine.connectionStatus$.subscribe(status => {
 
   (async () => {
     try {
-      // 1️⃣ Send marketCode and wait for it to succeed. This variable is IMPORTANT to send!
+      // 1 Send marketCode and wait for it to succeed. This variable is IMPORTANT to send!
       await postActivityAsync(directLine, {
         type: 'event',
         name: 'pvaSetContext',
@@ -255,7 +255,7 @@ directLine.connectionStatus$.subscribe(status => {
       });
       console.log('pvaSetContext sent');
 
-      // 2️⃣ Once that’s done, fire off startConversation
+      // 2️ Once that’s done, fire off startConversation
       await postActivityAsync(directLine, {
         type: 'event',
         name: 'startConversation',
