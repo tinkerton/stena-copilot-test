@@ -107,8 +107,114 @@
        // const languageSelect = document.getElementById('language-select');
        // const marketSelect = document.getElementById('market-select');
 
-        const styleOptions = {"accent":"#004A93","autoScrollSnapOnPage":true,"autoScrollSnapOnPageOffset":0,"avatarBorderRadius":"0%","avatarSize":30,"backgroundColor":"suggestedActionLayout#FFFFFFFF","botAvatarBackgroundColor":"#FFFFFFFF","botAvatarImage":"https://lobster-static-upload-production.s3.eu-west-1.amazonaws.com/avatars%0A%0A/5db9430ac789d0004f198f9e/f1c24112-21ee-438f-810b-cb84bcbb9a16.png","botAvatarInitials":"","bubbleAttachmentMaxWidth":480,"bubbleAttachmentMinWidth":250,"bubbleBackground":"#EEEEEEFF","bubbleBorderColor":"#FFFFFFFF","bubbleBorderRadius":11,"bubbleBorderStyle":"solid","bubbleBorderWidth":1,"bubbleFromUserBackground":"#004A93FF","bubbleFromUserBorderColor":"#FFFFFFFF","bubbleFromUserBorderRadius":11,"bubbleFromUserBorderStyle":"solid","bubbleFromUserBorderWidth":1,"bubbleFromUserNubOffset":0,"bubbleFromUserNubSize":0,"bubbleFromUserTextColor":"#FFFFFFFF","bubbleImageHeight":10,"bubbleImageMaxHeight":240,"bubbleImageMinHeight":240,"bubbleMessageMaxWidth":480,"bubbleMessageMinWidth":120,"bubbleMinHeight":50,"bubbleNubOffset":0,"bubbleTextColor":"#333333FF","emojiSet":true,"fontSizeSmall":"70%","hideUploadButton":true,"messageActivityWordBreak":"break-word","monospaceFont":"Consolas","paddingRegular":10,"paddingWide":10,"primaryFont":null,"sendBoxBackground":"#FFFFFFFF","sendBoxBorderTop":"solid 1px ","sendBoxButtonColor":"#004A93","sendBoxButtonColorOnHover":"#004284","sendBoxButtonShadeBorderRadius":40,"sendBoxButtonShadeColorOnHover":"","sendBoxHeight":60,"sendBoxPlaceholderColor":"#191919","sendBoxTextColor":"#333333FF","showAvatarInGroup":"status","spinnerAnimationHeight":16,"spinnerAnimationPadding":12,"spinnerAnimationWidth":16,"subtleColor":"#333333FF","suggestedActionBackgroundColor":"#FFFFFFFF","suggestedActionBackgroundColorOnHover":"#004A93","suggestedActionBorderColor":"#E6E6E6FF","suggestedActionBorderRadius":0,"suggestedActionBorderWidth":1,"suggestedActionLayout":"flow","suggestedActionTextColor":"#333333FF","typingAnimationBackgroundImage":"url('https://copilotstudiokit-dev.crm.dynamics.com/WebResources/cat_/powercat/img/loadingdots.gif')","typingAnimationDuration":5000,"typingAnimationHeight":20,"typingAnimationWidth":64,"userAvatarBackgroundColor":"#FFFFFFFF","userAvatarImage":"","userAvatarInitials":""};
-        const styleSet = WebChat.createStyleSet(styleOptions);
+       const styleOptions = {
+    // ===== Brand & Accents =====
+    accent: "#004A93",
+    subtleColor: "#333333FF",
+    backgroundColor: "#FFFFFFFF",
+    
+
+    // ===== Typography =====
+    primaryFont: "'stena line sans regular'", Arial, sans-serif",
+    monospaceFont: null,
+    fontSizeSmall: "70%",
+    messageActivityWordBreak: "break-word",
+
+    // ===== Layout & Padding =====
+    paddingRegular: 20,
+    paddingWide: 20,
+    autoScrollSnapOnPage: true,
+    autoScrollSnapOnPageOffset: 0,
+
+    // ===== Avatars =====
+    avatarSize: 30,
+    avatarBorderRadius: "0%", // e.g. "50%" for round
+    showAvatarInGroup: "status",
+
+    // Bot avatar
+    botAvatarBackgroundColor: "#FFFFFFFF",
+    botAvatarImage:
+      "https://lobster-static-upload-production.s3.eu-west-1.amazonaws.com/avatars%0A%0A/5db9430ac789d0004f198f9e/f1c24112-21ee-438f-810b-cb84bcbb9a16.png",
+    botAvatarInitials: "",
+
+    // User avatar
+    userAvatarBackgroundColor: "#FFFFFFFF",
+    userAvatarImage: "",
+    userAvatarInitials: "",
+
+    // ===== Message Bubbles =====
+    bubbleMinHeight: 50,
+    bubbleMessageMinWidth: 120,
+    bubbleMessageMaxWidth: 480,
+
+    // Attachments inside bubbles
+    bubbleAttachmentMinWidth: 250,
+    bubbleAttachmentMaxWidth: 480,
+
+    // Images inside bubbles
+    bubbleImageHeight: 10,     // reserved height for layout, not max
+    bubbleImageMinHeight: 240,
+    bubbleImageMaxHeight: 240,
+
+    // Bubble visuals, bot side
+    bubbleBackground: "#EEEEEEFF",
+    bubbleTextColor: "#333333FF",
+    bubbleBorderColor: "#FFFFFFFF",
+    bubbleBorderStyle: "solid",
+    bubbleBorderWidth: 1,
+    bubbleBorderRadius: 11,
+    bubbleNubOffset: 0,
+
+    // Bubble visuals, user side
+    bubbleFromUserBackground: "#004A93FF",
+    bubbleFromUserTextColor: "#FFFFFFFF",
+    bubbleFromUserBorderColor: "#FFFFFFFF",
+    bubbleFromUserBorderStyle: "solid",
+    bubbleFromUserBorderWidth: 1,
+    bubbleFromUserBorderRadius: 11,
+    bubbleFromUserNubOffset: 0,
+    bubbleFromUserNubSize: 0,
+
+    // ===== Send Box =====
+    sendBoxHeight: 60,
+    sendBoxBackground: "#FFFFFFFF",
+    sendBoxTextColor: "#333333FF",
+    sendBoxPlaceholderColor: "#191919",
+    sendBoxBorderTop: "solid 1px ",
+
+    // Send button
+    sendBoxButtonColor: "#004A93",
+    sendBoxButtonColorOnHover: "#004284",
+    sendBoxButtonShadeBorderRadius: 40,
+    sendBoxButtonShadeColorOnHover: "",
+
+    // ===== Suggested Actions =====
+    suggestedActionLayout: "flow",
+    suggestedActionBackgroundColor: "#FFFFFFFF",
+    suggestedActionBackgroundColorOnHover: "#EEEEEE",
+    suggestedActionBorderColor: "#E6E6E6FF",
+    suggestedActionBorderWidth: 1,
+    suggestedActionBorderRadius: 0,
+    suggestedActionTextColor: "#333333FF",
+
+    // ===== Typing & Spinner =====
+    typingAnimationBackgroundImage:
+      "url('https://copilotstudiokit-dev.crm.dynamics.com/WebResources/cat_/powercat/img/loadingdots.gif')",
+    typingAnimationDuration: 5000,
+    typingAnimationHeight: 20,
+    typingAnimationWidth: 64,
+
+    spinnerAnimationHeight: 16,
+    spinnerAnimationWidth: 16,
+    spinnerAnimationPadding: 12,
+
+    // ===== Misc =====
+    emojiSet: true,
+    hideUploadButton: true
+  }; 
+       
+       
+       const styleSet = WebChat.createStyleSet(styleOptions);
 
         
         // Fetch token & DirectLine URL
