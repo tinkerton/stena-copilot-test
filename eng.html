@@ -297,7 +297,58 @@
   }; 
        
        
-       const styleSet = WebChat.createStyleSet(styleOptions);
+  const styleSet = WebChat.createStyleSet(styleOptions);
+
+  // ===== Suggested Actions =====
+  styleSet.suggestedAction = {
+    ...styleSet.suggestedAction,
+    fontSize: '12px',
+    fontFamily: 'StenaLineSans, Arial, sans-serif',
+    
+    // Control the bubble/button size
+    padding: '4px 8px',   // top/bottom 10px, left/right 20px
+    minHeight: 20,          // minimum height of each action
+    borderRadius: 8         // make them more round or square
+  };
+
+  styleSet.suggestedActionPressed = {
+    ...styleSet.suggestedActionPressed,
+    fontSize: '12px',
+    fontFamily: 'StenaLineSans, Arial, sans-serif'
+
+     // Control the bubble/button size
+     padding: '4px 8px',   // top/bottom 10px, left/right 20px
+     minHeight: 20,          // minimum height of each action
+     borderRadius: 8         // make them more round or square
+  };
+
+  // ===== Chat Bubbles (from bot) =====
+  styleSet.messageActivity = {
+    ...styleSet.messageActivity,
+    fontSize: '16px',
+    fontFamily: 'StenaLineSans, Arial, sans-serif'
+  };
+
+  // ===== Chat Bubbles (from user) =====
+  styleSet.messageActivityFromUser = {
+    ...styleSet.messageActivityFromUser,
+    fontSize: '16px',
+    fontFamily: 'StenaLineSans, Arial, sans-serif'
+  };
+
+  // ===== Send Box =====
+  styleSet.sendBoxTextArea = {
+    ...styleSet.sendBoxTextArea,
+    fontSize: '16px',
+    fontFamily: 'StenaLineSans, Arial, sans-serif'
+  };
+
+  // If you also want the placeholder text styled:
+  styleSet.sendBoxPlaceholder = {
+    ...styleSet.sendBoxPlaceholder,
+    fontSize: '16px',
+    fontFamily: 'StenaLineSans, Arial, sans-serif'
+  };
 
         
         // Fetch token & DirectLine URL
