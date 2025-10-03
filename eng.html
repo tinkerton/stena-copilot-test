@@ -146,9 +146,10 @@
       #chat-header h1 { margin: 0; font-size: 14px; font-weight: 400;}
 
       /* Web Chat container, hide horizontal overflow */
-      /*#webchat { height: calc(100% - 50px); overflow-x: hidden; }*/
+      #webchat { height: calc(100% - 50px); overflow-x: hidden; }
       #webchat .webchat__suggested-actions__flow-box {
         justify-content: flex-end !important;
+        display: flex;
       }
 
       /* Chat toggle button */
@@ -241,21 +242,21 @@
     bubbleImageMaxHeight: 240,
 
     // Bubble visuals, bot side
-    bubbleBackground: "#ebebeb",
+    bubbleBackground: "#FFF",
     bubbleTextColor: "#333",
-    bubbleBorderColor: "#FFF",
+    bubbleBorderColor: "#EEE",
     bubbleBorderStyle: "solid",
-    bubbleBorderWidth: 1,
-    bubbleBorderRadius: 11,
+    bubbleBorderWidth: 0,
+    bubbleBorderRadius: 10,
     bubbleNubOffset: 0,
 
     // Bubble visuals, user side
-    bubbleFromUserBackground: "#004A93FF",
-    bubbleFromUserTextColor: "#FFF",
-    bubbleFromUserBorderColor: "#FFF",
+    bubbleFromUserBackground: "#cae2fb",
+    bubbleFromUserTextColor: "#333",
+    bubbleFromUserBorderColor: "#cae2fb",
     bubbleFromUserBorderStyle: "solid",
-    bubbleFromUserBorderWidth: 1,
-    bubbleFromUserBorderRadius: 11,
+    bubbleFromUserBorderWidth: 0,
+    bubbleFromUserBorderRadius: 10,
     bubbleFromUserNubOffset: 0,
     bubbleFromUserNubSize: 0,
 
@@ -275,13 +276,13 @@
     // ===== Suggested Actions =====
     suggestedActionLayout: "flow",
     suggestedActionBackgroundColor: "#FFF",
-    suggestedActionBackgroundColorOnHover: "#EEEEEE",
-    suggestedActionBorderColor: "#004a93",
-    suggestedActionBorderStyle: "dashed",
-    suggestedActionHeight: 10,
+    suggestedActionBackgroundColorOnHover: "#cae2fb",
+    suggestedActionBorderColor: "#cae2fb",
+    suggestedActionBorderStyle: "solid",
+    suggestedActionHeight: 30,
     suggestedActionBorderWidth: 1,
-    suggestedActionBorderRadius: 50,
-    suggestedActionTextColor: "#004a93",
+    suggestedActionBorderRadius: 8,
+    suggestedActionTextColor: "#333",
 
     // ===== Typing & Spinner =====
     typingAnimationBackgroundImage:
@@ -309,9 +310,7 @@
     fontFamily: 'StenaLineSans, Arial, sans-serif',
     
     // Control the bubble/button size
-    padding: '4px 8px',   // top/bottom 10px, left/right 20px
-    minHeight: 20,          // minimum height of each action
-    borderRadius: 8         // make them more round or square
+    padding: '5px 10px',   // top/bottom 10px, left/right 20px
   };
   
   styleSet.suggestedActionPressed = {
@@ -321,13 +320,6 @@
 
      // Control the bubble/button size
      padding: '4px 8px',   // top/bottom 10px, left/right 20px
-     minHeight: 20,          // minimum height of each action
-     borderRadius: 8         // make them more round or square
-  };
-
-  styleSet.suggestedActionLayout = {
-    ...styleSet.suggestedActionLayout,
-    justifyContent: 'flex-end'
   };
 
   // ===== Chat Bubbles (from bot) =====
