@@ -5,6 +5,103 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>(ENG) Stena Line Stina 2.0 Web Chat</title>
     <style>
+      /* Regular */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-Regular.woff2") format("woff2"),
+             url("fonts/StenaSans-Regular.woff") format("woff");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+    
+      /* Regular Italic */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-RegularItalic.woff2") format("woff2");
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+    
+      /* Light */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-Light.woff2") format("woff2");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+    
+      /* Light Italic */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-LightItalic.woff2") format("woff2");
+        font-weight: 300;
+        font-style: italic;
+        font-display: swap;
+      }
+    
+      /* Medium */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-Medium.woff2") format("woff2");
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+      }
+    
+      /* Medium Italic */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-MediumItalic.woff2") format("woff2");
+        font-weight: 500;
+        font-style: italic;
+        font-display: swap;
+      }
+    
+      /* Bold */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-Bold.woff2") format("woff2");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+    
+      /* Bold Italic */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-BoldItalic.woff2") format("woff2");
+        font-weight: 700;
+        font-style: italic;
+        font-display: swap;
+      }
+    
+      /* Bold Condensed */
+      @font-face {
+        font-family: "StenaLineSansCondensed";
+        src: url("fonts/StenaSans-BoldCondensed.woff2") format("woff2");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+    
+      /* Optional: Icon font */
+      @font-face {
+        font-family: "StenaLineIcons";
+        src: url("fonts/stenaline-icon.woff") format("woff");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+    
+      /* Example usage */
+      body {
+        font-family: "StenaLineSans", Arial, sans-serif;
+      }
+    </style>
+    <style>
       /* Page background */
       html, body { height: 100%; margin: 0; }
       .background { background: url('stenaline-website.png') no-repeat top center; background-size: 100% auto; width: 100%; aspect-ratio: 3220 / 11844; }
@@ -71,22 +168,7 @@
     </style>
   </head>
   <body class="background">
-    <!--<div id="global-settings">
-      <select id="language-select" title="Select language">
-        <option value="en-GB">English</option>
-        <option value="sv-SE">Svenska</option>
-        <option value="nl-NL">Nederlands</option>
-        <option value="pl-PL">Polski</option>
-    </select>
-      <select id="market-select" title="Select market">
-        <option value="uk">UK</option>
-        <option value="ie">IE</option>
-        <option value="se">SE</option>
-        <option value="nl">NL</option>
-        <option value="pl">PL</option>
-      </select>
-    </div>-->
-
+  
     <div id="chat-wrapper">
       <div id="chat-header"><h1>Stina 2.0 - English</h1></div>
       <div id="webchat" role="main"></div>
@@ -105,8 +187,6 @@
          // UI handlers
         const chatButton = document.getElementById('chat-button');
         const chatWrapper = document.getElementById('chat-wrapper');
-       // const languageSelect = document.getElementById('language-select');
-       // const marketSelect = document.getElementById('market-select');
 
        const styleOptions = {
     // ===== Brand & Accents =====
@@ -116,7 +196,7 @@
     
 
     // ===== Typography =====
-    primaryFont: "stena line sans regular, Arial, sans-serif",
+    primaryFont: "StenaLineSans, Arial, sans-serif",
     monospaceFont: null,
     fontSizeSmall: "70%",
     messageActivityWordBreak: "break-word",
