@@ -310,7 +310,7 @@
     minHeight: 20,          // minimum height of each action
     borderRadius: 8         // make them more round or square
   };
-
+  
   styleSet.suggestedActionPressed = {
     ...styleSet.suggestedActionPressed,
     fontSize: '12px',
@@ -320,6 +320,11 @@
      padding: '4px 8px',   // top/bottom 10px, left/right 20px
      minHeight: 20,          // minimum height of each action
      borderRadius: 8         // make them more round or square
+  };
+
+  styleSet.suggestedActionLayout = {
+    ...styleSet.suggestedActionLayout,
+    justifyContent: 'flex-end'
   };
 
   // ===== Chat Bubbles (from bot) =====
