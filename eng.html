@@ -107,10 +107,10 @@
        // const marketSelect = document.getElementById('market-select');
 
         // Base style options
-        const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
+        const styleOptions = { hideUploadButton: true};
         const styleSet = WebChat.createStyleSet(styleOptions);
 
-        // Bot bubble styling: auto width, max 100%, stacked vertically
+        /* Bot bubble styling: auto width, max 100%, stacked vertically
         styleSet.bubbleFromBot = {
           background: 'rgb(238, 238, 238)',
           margin: '7px 0 0 0',
@@ -150,10 +150,10 @@
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
-        };
+        };*/
 
         // Fetch token & DirectLine URL
-         const tokenEndpointURL = new URL(
+        const tokenEndpointURL = new URL(
           'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/creba_stina20/directline/token?api-version=2022-03-01-preview'
         );
         const apiVersion = tokenEndpointURL.searchParams.get('api-version');
