@@ -3,7 +3,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>(ENG) Stena Line Stina 2.0 Web Chat</title>
+    <title>Stina</title>
     <style>
       /* Regular */
       @font-face {
@@ -131,7 +131,7 @@
         background: #fff;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         z-index: 500;
-        font-size: 12px;
+        font-size: 14px;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
       }
       /* Chat header */
@@ -143,7 +143,7 @@
         align-items: center;
         padding: 0 20px;
       }
-      #chat-header h1 { margin: 0; font-size: 16px; font-weight: 400;}
+      #chat-header h1 { margin: 0; font-size: 14px; font-weight: 400;}
 
       /* Web Chat container, hide horizontal overflow */
       #webchat { height: calc(100% - 50px); overflow-x: hidden; }
@@ -330,28 +330,28 @@
   // ===== Chat Bubbles (from bot) =====
   styleSet.messageActivity = {
     ...styleSet.messageActivity,
-    fontSize: '16px',
+    fontSize: '14px',
     fontFamily: 'StenaLineSans, Arial, sans-serif'
   };
 
   // ===== Chat Bubbles (from user) =====
   styleSet.messageActivityFromUser = {
     ...styleSet.messageActivityFromUser,
-    fontSize: '16px',
+    fontSize: '14px',
     fontFamily: 'StenaLineSans, Arial, sans-serif'
   };
 
   // ===== Send Box =====
   styleSet.sendBoxTextArea = {
     ...styleSet.sendBoxTextArea,
-    fontSize: '16px',
+    fontSize: '14px',
     fontFamily: 'StenaLineSans, Arial, sans-serif'
   };
 
   // If you also want the placeholder text styled:
   styleSet.sendBoxPlaceholder = {
     ...styleSet.sendBoxPlaceholder,
-    fontSize: '16px',
+    fontSize: '14px',
     fontFamily: 'StenaLineSans, Arial, sans-serif'
   };
 
