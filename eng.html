@@ -107,51 +107,10 @@
        // const languageSelect = document.getElementById('language-select');
        // const marketSelect = document.getElementById('market-select');
 
-        const styleOptions = { hideUploadButton: true, accent: '#FF0000', suggestedActionLayout: 'stacked' };
+        const styleOptions = {"accent":"#004A93","autoScrollSnapOnPage":true,"autoScrollSnapOnPageOffset":0,"avatarBorderRadius":"0%","avatarSize":30,"backgroundColor":"suggestedActionLayout#FFFFFFFF","botAvatarBackgroundColor":"#FFFFFFFF","botAvatarImage":"https://lobster-static-upload-production.s3.eu-west-1.amazonaws.com/avatars%0A%0A/5db9430ac789d0004f198f9e/f1c24112-21ee-438f-810b-cb84bcbb9a16.png","botAvatarInitials":"","bubbleAttachmentMaxWidth":480,"bubbleAttachmentMinWidth":250,"bubbleBackground":"#EEEEEEFF","bubbleBorderColor":"#FFFFFFFF","bubbleBorderRadius":11,"bubbleBorderStyle":"solid","bubbleBorderWidth":1,"bubbleFromUserBackground":"#004A93FF","bubbleFromUserBorderColor":"#FFFFFFFF","bubbleFromUserBorderRadius":11,"bubbleFromUserBorderStyle":"solid","bubbleFromUserBorderWidth":1,"bubbleFromUserNubOffset":0,"bubbleFromUserNubSize":0,"bubbleFromUserTextColor":"#FFFFFFFF","bubbleImageHeight":10,"bubbleImageMaxHeight":240,"bubbleImageMinHeight":240,"bubbleMessageMaxWidth":480,"bubbleMessageMinWidth":120,"bubbleMinHeight":50,"bubbleNubOffset":0,"bubbleTextColor":"#333333FF","emojiSet":true,"fontSizeSmall":"70%","hideUploadButton":true,"messageActivityWordBreak":"break-word","monospaceFont":"Consolas","paddingRegular":10,"paddingWide":10,"primaryFont":null,"sendBoxBackground":"#FFFFFFFF","sendBoxBorderTop":"solid 1px ","sendBoxButtonColor":"#004A93","sendBoxButtonColorOnHover":"#004284","sendBoxButtonShadeBorderRadius":40,"sendBoxButtonShadeColorOnHover":"","sendBoxHeight":60,"sendBoxPlaceholderColor":"#191919","sendBoxTextColor":"#333333FF","showAvatarInGroup":"status","spinnerAnimationHeight":16,"spinnerAnimationPadding":12,"spinnerAnimationWidth":16,"subtleColor":"#333333FF","suggestedActionBackgroundColor":"#FFFFFFFF","suggestedActionBackgroundColorOnHover":"#004A93","suggestedActionBorderColor":"#E6E6E6FF","suggestedActionBorderRadius":0,"suggestedActionBorderWidth":1,"suggestedActionLayout":"flow","suggestedActionTextColor":"#333333FF","typingAnimationBackgroundImage":"url('https://copilotstudiokit-dev.crm.dynamics.com/WebResources/cat_/powercat/img/loadingdots.gif')","typingAnimationDuration":5000,"typingAnimationHeight":20,"typingAnimationWidth":64,"userAvatarBackgroundColor":"#FFFFFFFF","userAvatarImage":"","userAvatarInitials":""};
         const styleSet = WebChat.createStyleSet(styleOptions);
 
-        // Bot bubble styling: auto width, max 100%, stacked vertically
-        styleSet.bubbleFromBot = {
-          background: 'rgb(238, 238, 238)',
-          margin: '7px 0 0 0',
-          width: 'auto',
-          maxWidth: '100%',
-          padding: '10px 14px',
-          borderRadius: '10px 10px 10px 0px',
-          transform: 'scale(1)',
-          animationFillMode: 'forwards',
-          transformOrigin: '0px 0px',
-          transition: 'border-radius 300ms',
-          whiteSpace: 'normal'
-        };
-
-        // Quick replies container: vertical stack
-        styleSet.suggestedActionsContainer = {
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          maxWidth: '380px',
-          width: '100%'
-        };
-
-        // Quick reply button styling: no right margin to avoid overflow
-        styleSet.suggestedAction = {
-          width: '100%',
-          backgroundColor: 'transparent',
-          border: 'thin dashed rgb(212, 212, 212)',
-          color: 'black',
-          minWidth: '100px',
-          margin: '10px 0 0 0',
-          padding: '10px 14px',
-          borderRadius: '20px',
-          textAlign: 'center',
-          fontSize: '10px',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        };
-
+        
         // Fetch token & DirectLine URL
         const tokenEndpointURL = new URL(
           'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/creba_stina20/directline/token?api-version=2022-03-01-preview'
