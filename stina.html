@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stina</title>
+
+    <!-- Fonts -->
+    <style>
+      /* Regular */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-Regular.woff2") format("woff2"),
+             url("fonts/StenaSans-Regular.woff") format("woff");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Regular Italic */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-RegularItalic.woff2") format("woff2");
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      /* Light */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-Light.woff2") format("woff2");
+        font-weight: 300;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Light Italic */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-LightItalic.woff2") format("woff2");
+        font-weight: 300;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      /* Medium */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-Medium.woff2") format("woff2");
+        font-weight: 500;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Medium Italic */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-MediumItalic.woff2") format("woff2");
+        font-weight: 500;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      /* Bold */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-Bold.woff2") format("woff2");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Bold Italic */
+      @font-face {
+        font-family: "StenaLineSans";
+        src: url("fonts/StenaSans-BoldItalic.woff2") format("woff2");
+        font-weight: 700;
+        font-style: italic;
+        font-display: swap;
+      }
+
+      /* Bold Condensed */
+      @font-face {
+        font-family: "StenaLineSansCondensed";
+        src: url("fonts/StenaSans-BoldCondensed.woff2") format("woff2");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Optional: Icon font */
+      @font-face {
+        font-family: "StenaLineIcons";
+        src: url("fonts/stenaline-icon.woff") format("woff");
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      /* Base */
+      html, body { height: 100%; margin: 0; }
+      body { font-family: "StenaLineSans", Arial, sans-serif; }
+
+      /* Background demo image, optional */
+      .background {
+        background: url('stenaline-website.png') no-repeat top center;
+        background-size: 100% auto;
+        width: 100%;
+        aspect-ratio: 3220 / 11844;
+      }
+
+      /* Chat wrapper */
+      #chat-wrapper {
+        position: fixed;
+        inset: 0;               /* full size inside iframe */
+        border: 0;
+        border-radius: 0;
+        overflow: hidden;
+        background: #fff;
+        z-index: 1;
+        font-size: 15px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Chat header */
+      #chat-header {
+        background-color: #004a93;
+        color: white;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+      }
+      #chat-header h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        font-family: "StenaLineSans", Arial, sans-serif;
+      }
+
+      /* Web Chat container */
+      #webchat {
+        flex: 1;
+        min-height: 0;
+        overflow-x: hidden;
+      }
+      #webchat .webchat__suggested-actions__flow-box {
+        justify-content: flex-end !important;
+      }
+    </style>
+
+    <script crossorigin="anonymous" src="https://cdn.botframework.com/botframework-webchat/latest/webchat.js"></script>
+  </head>
+  <body class="background">
+    <div id="chat-wrapper">
+      <div id="chat-header"><h1>Stina</h1></div>
+      <div id="webchat" role="main"></div>
+    </div>
+
+    <script>
+      (async function() {
+        // Language and market
+        const CHAT_LANGUAGE = "en-GB"; // "sv-SE", "nl-NL", "pl-PL" etc
+        const CHAT_MARKET   = "uk";    // "se", "uk", "ie", "pl", "nl"
+
+        // Style options
+        const styleOptions = {
+          // Brand
+          accent: "#004A93",
+          subtleColor: "#333",
+          backgroundColor: "#FFF",
+
+          // Typography
+          primaryFont: "StenaLineSans, Arial, sans-serif",
+          monospaceFont: null,
+          fontSizeSmall: "70%",
+          messageActivityWordBreak: "break-word",
+
+          // Layout
+          paddingRegular: 10,
+          paddingWide: 10,
+          autoScrollSnapOnPage: true,
+          autoScrollSnapOnPageOffset: 0,
+
+          // Avatars
+          avatarSize: 20,
+          avatarBorderRadius: "0%",
+          showAvatarInGroup: "status",
+
+          // Bot avatar
+          botAvatarBackgroundColor: "#FFF",
+          botAvatarImage: "StinaBlueAvatar.png",
+          botAvatarInitials: "",
+
+          // User avatar
+          userAvatarBackgroundColor: "#FFF",
+          userAvatarImage: "",
+          userAvatarInitials: "",
+
+          // Bubbles sizing
+          bubbleMinHeight: 30,
+          bubbleMessageMinWidth: 120,
+          bubbleMessageMaxWidth: 480,
+          bubbleAttachmentMinWidth: 250,
+          bubbleAttachmentMaxWidth: 480,
+
+          // Images inside bubbles
+          bubbleImageHeight: 10,
+          bubbleImageMinHeight: 240,
+          bubbleImageMaxHeight: 240,
+
+          // Bot bubble visuals
+          bubbleBackground: "#FFF",
+          bubbleTextColor: "#333",
+          bubbleBorderColor: "#EEE",
+          bubbleBorderStyle: "solid",
+          bubbleBorderWidth: 1,
+          bubbleBorderRadius: 10,
+          bubbleNubOffset: 0,
+
+          // User bubble visuals
+          bubbleFromUserBackground: "#cae2fb",
+          bubbleFromUserTextColor: "#333",
+          bubbleFromUserBorderColor: "#cae2fb",
+          bubbleFromUserBorderStyle: "solid",
+          bubbleFromUserBorderWidth: 1,
+          bubbleFromUserBorderRadius: 10,
+          bubbleFromUserNubOffset: 0,
+          bubbleFromUserNubSize: 0,
+
+          // Send box
+          sendBoxHeight: 60,
+          sendBoxBackground: "#FFF",
+          sendBoxTextColor: "#333",
+          sendBoxPlaceholderColor: "#191919",
+          sendBoxBorderTop: "solid 1px #EEE",
+
+          // Send button
+          sendBoxButtonColor: "#333",
+          sendBoxButtonColorOnHover: "#004a93",
+          //sendBoxButtonShadeBorderRadius: "",
+          //sendBoxButtonShadeColorOnHover: "",
+
+          // Suggested actions
+          suggestedActionLayout: "flow",
+          suggestedActionBackgroundColor: "#FFF",
+          suggestedActionBackgroundColorOnHover: "#cae2fb",
+          suggestedActionBorderColor: "#cae2fb",
+          suggestedActionBorderStyle: "solid",
+          suggestedActionHeight: 30,
+          suggestedActionBorderWidth: 1,
+          suggestedActionBorderRadius: 8,
+          suggestedActionTextColor: "#333",
+
+          // Typing and spinner
+          typingAnimationBackgroundImage: "url('loadingdots.gif')",
+          typingAnimationDuration: 5000,
+          typingAnimationHeight: 20,
+          typingAnimationWidth: 64,
+          spinnerAnimationHeight: 16,
+          spinnerAnimationWidth: 16,
+          spinnerAnimationPadding: 12,
+
+          // Misc
+          emojiSet: true,
+          hideUploadButton: true
+        };
+
+       
+        // Fetch token and Direct Line URL
+        const tokenEndpointURL = new URL(
+          'https://157c0ba005bf48ddb4295b82e6a597.6b.environment.api.powerplatform.com/powervirtualagents/botsbyschema/creba_stina20/directline/token?api-version=2022-03-01-preview'
+        );
+
+        const apiVersion = tokenEndpointURL.searchParams.get('api-version');
+
+        const [directLineURL, token] = await Promise.all([
+          fetch(new URL(`/powervirtualagents/regionalchannelsettings?api-version=${apiVersion}`, tokenEndpointURL))
+            .then(r => {
+              if (!r.ok) throw new Error(`channel settings fetch failed: ${r.status}`);
+              return r.json();
+            })
+            .then(j => j.channelUrlsById.directline),
+          fetch(tokenEndpointURL)
+            .then(r => {
+              if (!r.ok) throw new Error(`token fetch failed: ${r.status}`);
+              return r.json();
+            })
+            .then(j => j.token)
+        ]);
+
+        const directLine = WebChat.createDirectLine({
+          domain: new URL('v3/directline', directLineURL).toString(),
+          token
+        });
+
+        function postActivityAsync(directLine, activity) {
+          return new Promise((resolve, reject) => {
+            directLine.postActivity(activity).subscribe({
+              next: id   => resolve(id),
+              error: err => reject(err)
+            });
+          });
+        }
+
+        // After connection goes Online, set context then start conversation
+        directLine.connectionStatus$.subscribe(status => {
+          if (status !== 2) return;
+
+          (async () => {
+            try {
+              await postActivityAsync(directLine, {
+                type: 'event',
+                name: 'pvaSetContext',
+                value: { marketCode: CHAT_MARKET }
+              });
+              await postActivityAsync(directLine, {
+                type: 'event',
+                name: 'startConversation',
+                locale: CHAT_LANGUAGE,
+                localTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+              });
+            } catch (err) {
+              console.error('Chat initialization failed:', err);
+            }
+          })();
+        });
+
+        // Render Web Chat full size
+        WebChat.renderWebChat(
+          { directLine, locale: CHAT_LANGUAGE, styleOptions },
+          document.getElementById('webchat')
+        );
+      })();
+    </script>
+  </body>
+</html>
